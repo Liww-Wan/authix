@@ -6,8 +6,18 @@ const h = (t, p = {}, ...k) => { const e = document.createElement(t); for (const
 const LOCK_MS = 120000;
 let idle, timer, rows = [], shown = new Set(), stopCam = null, editing = null;
 const toast = m => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2500); };
-const view = id => { $('lock').hidden = id !== 'lock'; $('app').hidden = id !== 'app'; };
+const view = id => { $('lock').hidden = id !== 'lock'; $('app').hidden = id !== 'app'; document.body.classList.toggle('locked', id === 'lock'); };
 const busy = async (btn, fn) => { btn.disabled = true; try { await fn(); } finally { btn.disabled = false; } };
+
+function closeDialogs() {
+  for (const id of ['dlgAcc', 'dlgBk']) {
+    const d = $(id);
+    if (d.open) d.close();
+    d.removeAttribute('open');
+    d.hidden = true;
+  }
+  $('toast').hidden = true;
+}
 
 function showLock() {
   const ex = V.exists(); view('lock');
@@ -34,9 +44,11 @@ async function go() {
 function enter() { view('app'); render(); clearInterval(timer); timer = setInterval(tick, 500); poke(); }
 function lock() {
   V.lock(); rows = []; shown.clear(); editing = null; clearInterval(timer); clearTimeout(idle);
-  stopCamera(); $('list').replaceChildren(); $('search').value = '';
-  for (const d of ['dlgAcc', 'dlgBk']) $(d).close();
+  try { stopCamera(); } catch {}
+  $('list').replaceChildren(); $('search').value = '';
+  closeDialogs();
   for (const i of ['fUri', 'fIssuer', 'fName', 'fSecret', 'bMaster', 'bPw', 'bImpPw']) $(i).value = '';
+  $('bFile').value = ''; $('bMsg').textContent = '';
   $('accQr').removeAttribute('src'); $('accQr').hidden = true;
   showLock();
 }
@@ -88,7 +100,7 @@ function fill(a) {
 function openAcc(a) {
   editing = a || null; $('accTitle').textContent = a ? 'Editar conta' : 'Adicionar conta';
   fill(a || {}); $('fUri').value = $('accMsg').textContent = ''; $('accQr').hidden = true; $('accQr').removeAttribute('src');
-  $('accQrBtn').hidden = !a; $('dlgAcc').showModal();
+  $('accQrBtn').hidden = !a; $('dlgAcc').hidden = false; $('dlgAcc').showModal();
 }
 function fromUri(text) { try { fill(T.parseUri(text)); $('fUri').value = ''; $('accMsg').textContent = ''; } catch (e) { $('accMsg').textContent = e.message; } }
 async function saveAcc() {
@@ -100,12 +112,17 @@ async function saveAcc() {
     const period = parseInt($('fPer').value, 10);
     if (!(period >= 5 && period <= 300)) throw new Error('Período inválido.');
     await V.upsert({ id: editing?.id, issuer, name, secret, algorithm: $('fAlg').value, digits: parseInt($('fDig').value, 10), period });
-    stopCamera(); $('dlgAcc').close(); render(); toast('Conta salva');
+    stopCamera(); $('fSecret').value = ''; $('dlgAcc').close(); render(); toast('Conta salva');
   } catch (e) { $('accMsg').textContent = e.message; }
 }
 
 // --- backup ---
 const download = (name, text) => { const u = URL.createObjectURL(new Blob([text], { type: 'application/octet-stream' })); const a = h('a', { href: u, download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 1000); };
+function closeBackup() {
+  for (const i of ['bMaster', 'bPw', 'bImpPw']) $(i).value = '';
+  $('bFile').value = ''; $('bMsg').textContent = '';
+  $('dlgBk').close(); $('dlgBk').hidden = true;
+}
 async function doExport() {
   await busy($('bExport'), async () => {
     $('bMsg').textContent = '';
@@ -114,7 +131,7 @@ async function doExport() {
       if (bp.length < 12) throw new Error('A senha do backup deve ter ao menos 12 caracteres.');
       await V.verify($('bMaster').value);
       download('webauth-vault.wv', await V.exportBackup(bp));
-      $('bMaster').value = $('bPw').value = ''; toast('Backup exportado');
+      closeBackup(); toast('Backup exportado');
     } catch (e) { $('bMsg').textContent = e.message; }
   });
 }
@@ -125,7 +142,7 @@ async function doImport() {
       const f = $('bFile').files[0]; if (!f) throw new Error('Selecione um arquivo .wv');
       if (f.size > 5e6) throw new Error('Arquivo grande demais');
       const n = await V.importBackup(await f.text(), $('bImpPw').value);
-      $('bImpPw').value = ''; $('bFile').value = ''; render(); toast(`${n} conta(s) importada(s)`);
+      closeBackup(); render(); toast(`${n} conta(s) importada(s)`);
     } catch (e) { $('bMsg').textContent = e.message; }
   });
 }
@@ -136,7 +153,7 @@ $('wipeBtn').onclick = () => { if (confirm('Apagar PERMANENTEMENTE o cofre deste
 $('lockBtn').onclick = lock;
 $('addBtn').onclick = () => openAcc(null);
 $('search').oninput = render;
-$('accCancel').onclick = () => { stopCamera(); $('dlgAcc').close(); };
+$('accCancel').onclick = () => { stopCamera(); $('fSecret').value = ''; $('dlgAcc').close(); };
 $('dlgAcc').addEventListener('close', stopCamera);
 $('accSave').onclick = saveAcc;
 $('fUri').onchange = () => $('fUri').value.trim() && fromUri($('fUri').value);
@@ -146,10 +163,12 @@ $('camBtn').onclick = async () => {
   catch { $('cam').hidden = true; $('accMsg').textContent = 'Câmera indisponível ou permissão negada.'; }
 };
 $('accQrBtn').onclick = () => { $('accQr').src = Q.makeQR(T.buildUri(editing)); $('accQr').hidden = false; };
-$('backupBtn').onclick = () => { $('bMsg').textContent = ''; $('dlgBk').showModal(); };
-$('bClose').onclick = () => $('dlgBk').close();
+$('backupBtn').onclick = () => { $('bMsg').textContent = ''; $('dlgBk').hidden = false; $('dlgBk').showModal(); };
+$('bClose').onclick = closeBackup;
 $('bExport').onclick = doExport;
 $('bImport').onclick = doImport;
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
+closeDialogs();
 showLock();
+window.addEventListener('pageshow', e => { if (e.persisted) lock(); });
