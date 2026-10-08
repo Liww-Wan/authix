@@ -47,3 +47,6 @@ video,#accQr{width:100%;border-radius:8px}
 #accQr{max-width:260px;background:#fff;padding:8px;align-self:center}
 
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px}
+
+/* Campos secretos: texto com bolinhas, para o navegador não oferecer salvar a senha */
+.secret{-webkit-text-security:disc;text-security:disc}
