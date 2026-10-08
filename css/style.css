@@ -4,13 +4,22 @@
 body{margin:0;font:16px system-ui,sans-serif;background:var(--bg);color:var(--fg)}
 [hidden]{display:none!important}
 main{max-width:720px;margin:0 auto;padding:16px}
-.card{margin-top:10vh;background:var(--card);border-radius:12px}
-.card,dialog{display:flex;flex-direction:column;gap:10px}
+
+/* Tela de desbloqueio */
+#lock{display:flex;flex-direction:column;gap:12px;margin:10vh auto 0;max-width:420px;padding:24px;background:var(--card);border-radius:12px}
+#lock[hidden]{display:none!important}
+#lock h1{margin:0}
+#lock p{margin:0}
+#lock .small{margin:8px 0}
+#wipeBtn{margin-top:12px}
+
 input,select,button,.btn{font:inherit;padding:10px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--fg)}
 button,.btn{cursor:pointer;text-align:center}
 .primary{background:var(--ac);color:#fff;border-color:var(--ac)}
 .danger{color:var(--er);border-color:var(--er)}
 .muted{color:var(--mut)}.small{font-size:.85rem}.err{color:var(--er);min-height:1.2em;margin:0}
+
+/* Tela principal */
 header{display:flex;flex-wrap:wrap;gap:8px}
 header input{flex:1 1 200px}
 ul{list-style:none;padding:0;display:grid;gap:12px}
@@ -20,9 +29,18 @@ li{background:var(--card);border-radius:12px;padding:14px;display:grid;gap:6px}
 .bar{height:6px;background:var(--bd);border-radius:3px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--ac)}
 .row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
-dialog{width:min(480px,94vw);background:var(--card);color:var(--fg);border:0;border-radius:12px;padding:16px}
-dialog[open]{display:flex}
+
+/* Pop-ups: só aparecem quando abertos */
+dialog{width:min(480px,94vw);background:var(--card);color:var(--fg);border:0;border-radius:12px;padding:20px}
+dialog:not([open]){display:none}
+dialog[open]{display:flex;flex-direction:column;gap:12px;margin:auto;max-height:90vh;overflow:auto}
 dialog::backdrop{background:#0008}
+dialog h2{margin:0 0 4px}
+dialog p{margin:0}
+dialog hr{width:100%;border:0;border-top:1px solid var(--bd);margin:14px 0}
+dialog input,dialog select,dialog button{width:100%}
+dialog .row>*{width:auto}
 video,#accQr{width:100%;border-radius:8px}
 #accQr{max-width:260px;background:#fff;padding:8px;align-self:center}
+
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px}
