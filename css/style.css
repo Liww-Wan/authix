@@ -35,6 +35,7 @@ dialog{width:min(480px,94vw);background:var(--card);color:var(--fg);border:0;bor
 dialog:not([open]){display:none!important}
 dialog:not([open])::backdrop{display:none!important}
 dialog[hidden]{display:none!important}
+body.locked dialog{display:none!important}
 dialog[open]{display:flex;flex-direction:column;gap:12px;margin:auto;max-height:90vh;overflow:auto}
 dialog::backdrop{background:#0008}
 dialog h2{margin:0 0 4px}
