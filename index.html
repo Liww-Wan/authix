@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; media-src blob:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0f172a">
+<title>WebAuth Vault</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main id="lock" class="card" hidden>
+  <h1>WebAuth Vault</h1>
+  <p id="lockInfo" class="muted"></p>
+  <input id="pw" type="password" placeholder="Senha mestra" autocomplete="off">
+  <input id="pw2" type="password" placeholder="Confirmar senha mestra" autocomplete="off">
+  <button id="unlockBtn" class="primary"></button>
+  <p id="msg" class="err" role="alert"></p>
+  <p class="muted small">Se esquecer a senha mestra e não tiver um backup válido, o cofre será irrecuperável. Não existe backdoor.</p>
+  <button id="wipeBtn" class="danger">Apagar cofre deste navegador</button>
+</main>
+
+<main id="app" hidden>
+  <header>
+    <input id="search" type="search" placeholder="Pesquisar contas…" autocomplete="off">
+    <button id="addBtn" class="primary">+ Adicionar</button>
+    <button id="backupBtn">Backup</button>
+    <button id="lockBtn">Bloquear</button>
+  </header>
+  <ul id="list"></ul>
+  <p id="empty" class="muted" hidden>Nenhuma conta. Clique em “Adicionar”.</p>
+</main>
+
+<dialog id="dlgAcc">
+  <h2 id="accTitle">Conta</h2>
+  <div class="row">
+    <button id="camBtn">Escanear com câmera</button>
+    <label class="btn">Imagem de QR<input id="qrFile" type="file" accept="image/*" hidden></label>
+  </div>
+  <video id="cam" playsinline muted hidden></video>
+  <input id="fUri" placeholder="otpauth://totp/… (opcional)" autocomplete="off">
+  <input id="fIssuer" placeholder="Serviço (ex.: Google)" autocomplete="off">
+  <input id="fName" placeholder="Usuário / e-mail" autocomplete="off">
+  <input id="fSecret" type="password" placeholder="Chave secreta (Base32)" autocomplete="off">
+  <div class="row">
+    <select id="fAlg"><option>SHA1</option><option>SHA256</option><option>SHA512</option></select>
+    <select id="fDig"><option>6</option><option>8</option></select>
+    <input id="fPer" type="number" min="5" max="300" value="30">
+  </div>
+  <img id="accQr" alt="QR Code da conta" hidden>
+  <p id="accMsg" class="err" role="alert"></p>
+  <div class="row"><button id="accQrBtn">Mostrar QR</button><button id="accCancel">Cancelar</button><button id="accSave" class="primary">Salvar</button></div>
+</dialog>
+
+<dialog id="dlgBk">
+  <h2>Backup</h2>
+  <p class="muted small">Exportar (arquivo .wv criptografado). Confirme a senha mestra e escolha a senha do backup (pode ser diferente).</p>
+  <input id="bMaster" type="password" placeholder="Senha mestra" autocomplete="off">
+  <input id="bPw" type="password" placeholder="Senha do backup" autocomplete="off">
+  <button id="bExport" class="primary">Exportar</button>
+  <hr>
+  <p class="muted small">Importar (as contas são mescladas ao cofre atual).</p>
+  <input id="bFile" type="file" accept=".wv,application/json">
+  <input id="bImpPw" type="password" placeholder="Senha do backup" autocomplete="off">
+  <button id="bImport">Importar</button>
+  <p id="bMsg" class="err" role="alert"></p>
+  <button id="bClose">Fechar</button>
+</dialog>
+<div id="toast" hidden></div>
+<script src="js/vendor/jsQR.js"></script>
+<script src="js/vendor/qrcode.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
