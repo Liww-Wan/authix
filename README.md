@@ -1,51 +1,116 @@
-# WebAuth Vault
+# 🔐 WebAuth Vault
 
-Autenticador 2FA/TOTP (RFC 6238) **100% client-side**, estático, para GitHub Pages. Sem backend, sem telemetria, sem contas.
+Um **cofre de códigos de segurança** que funciona direto no navegador. Ele gera aqueles códigos de 6 números que mudam a cada 30 segundos, usados para entrar em contas como Google, Microsoft e GitHub com mais segurança.
 
-## Arquitetura de segurança
-Senha mestra → PBKDF2-HMAC-SHA-256 (600.000 iterações, salt aleatório de 16 bytes) → chave AES-256-GCM (não extraível) → cofre cifrado em `localStorage`. Cada gravação usa IV aleatório novo de 12 bytes (`crypto.getRandomValues`).
-- **Por que PBKDF2 e não Argon2id:** Argon2id exigiria WASM de terceiros; preferi apenas a Web Crypto nativa (menos superfície de ataque). Compensação: PBKDF2 é menos resistente a GPUs, então use uma senha mestra longa (frase-senha).
-- **TOTP:** SHA-1/256/512, 6 ou 8 dígitos, período configurável (validado com os vetores da RFC 6238).
-- **QR:** leitura (`jsQR 1.4.0`) e geração (`qrcode-generator 1.4.4`) locais; ambas são cópias vendorizadas em `js/vendor/` (sem CDN).
-- **CSP** por `<meta>` (sem inline, sem eval, `connect-src 'self'`); a UI usa `textContent`/`createElement`, nunca `innerHTML`.
-- **Auto-bloqueio** após 2 min de inatividade (`LOCK_MS` em `js/app.js`).
-- **Não implementado:** WebAuthn/Passkeys (opcional no pedido). Se adicionado, serviria só como desbloqueio extra da interface; não substitui a cifragem do cofre (cifragem = proteger dados em repouso; autenticação = provar quem usa; TOTP = gerar o código).
+**Tudo fica só no seu aparelho.** Nada é enviado para a Internet, não há cadastro, anúncios nem rastreadores.
 
-## Estrutura
-`index.html`, `css/style.css`, `js/{app,crypto,totp,vault,qr}.js`, `js/vendor/`, `manifest.json`, `service-worker.js`, `icons/`. Todos os caminhos são relativos, então funciona em `https://usuario.github.io/webauth/`.
+---
 
-## Publicar no GitHub Pages
-1. Crie um repositório público (ex.: `webauth`) e envie estes arquivos na raiz: `git init && git add . && git commit -m "WebAuth Vault" && git branch -M main && git remote add origin <URL> && git push -u origin main`.
-2. No GitHub: **Settings → Pages → Build and deployment → Deploy from a branch → `main` / `/ (root)` → Save**.
-3. Aguarde ~1 min e abra `https://usuario.github.io/webauth/`.
+## 🤔 Para que serve?
 
-## Testar localmente
-`python3 -m http.server 8000` e abra `http://localhost:8000/` (service worker e câmera exigem HTTPS ou localhost).
+Muitos sites pedem uma "verificação em duas etapas": além da senha, você digita um código que muda toda hora. Este app cria esse código para você, sem precisar de outro aplicativo instalado.
 
-## Atualizar
-Edite os arquivos, **incremente `VERSION` em `service-worker.js`** (ex.: `wv-v2`), faça commit e push. Os clientes recebem a versão nova na visita seguinte.
+---
 
-## Uso
-1. **Abrir:** acesse a URL do Pages (no celular, "Adicionar à tela inicial").
-2. **Criar cofre:** defina a senha mestra (mín. 12 caracteres) e confirme.
-3. **Adicionar conta Google:** na página de segurança do Google, escolha configurar app autenticador e clique em **+ Adicionar**.
-4. **Escanear QR:** botão "Escanear com câmera" ou "Imagem de QR"; também dá para colar o `otpauth://` ou digitar a chave Base32.
-5. **Gerar código:** clique em "Mostrar/Ocultar" ou "Copiar" e digite o código na página oficial do Google (o app nunca faz login nem usa OAuth).
-6. **Backup:** Backup → confirme a senha mestra → defina a senha do backup (pode ser diferente) → baixa `webauth-vault.wv` (cifrado).
-7. **Restaurar:** em outro navegador crie um cofre, vá em Backup → escolha o `.wv` → senha do backup → Importar (mescla sem duplicar).
-8. **Offline:** após a primeira visita, o service worker guarda os arquivos; funciona sem Internet. A senha mestra nunca é armazenada.
-9. **Apagar tudo:** tela de bloqueio → "Apagar cofre deste navegador" (e, se quiser, limpe os dados do site e desregistre o service worker).
+## 🚀 Como começar (passo a passo)
 
-## ⚠️ Recuperação
-Se esquecer a senha mestra e não tiver um backup válido, **o cofre é irrecuperável**. Não há senha administrativa nem backdoor.
+### 1. Abra o app
+Acesse o endereço onde ele foi publicado. No celular, você pode escolher "Adicionar à tela inicial" para abrir como um aplicativo.
 
-## Revisão de segurança (autoanálise, não é auditoria independente)
-- XSS: sem `innerHTML`; dados do usuário só via `textContent`/atributos; CSP sem `unsafe-inline`/`unsafe-eval`.
-- Segredos: nenhum em código, URL ou parâmetros GET; sem `console.log`; nenhuma chamada de rede (`connect-src 'self'`). CSRF não se aplica (sem backend).
-- IV: aleatório por cifragem (12 bytes); salt aleatório por cofre e por backup.
-- Importação: valida formato e limita iterações (100k–5M) e tamanho do arquivo.
-- Service worker: só GET do mesmo origin, só arquivos estáticos; backups são downloads, nunca vão ao cache.
-- Dependências: 2 bibliotecas fixas, vendorizadas; confira os hashes ao atualizá-las.
+### 2. Crie o seu cofre
+Escolha uma **senha mestra** com pelo menos 12 caracteres. Uma frase longa é uma boa ideia, por exemplo: *"meu gato come peixe todo domingo"*. Digite a senha duas vezes e clique em **Criar cofre**.
 
-## Limitações reais
-**Não é "100% seguro".** O navegador não permite apagar memória de forma garantida: limpar variáveis ao bloquear reduz, mas não elimina, resíduos (GC, swap). Malware, extensões maliciosas ou XSS em outro conteúdo do mesmo origin podem ler o cofre desbloqueado. `localStorage` pode ser apagado pelo navegador (mantenha backups). A CSP via `<meta>` não cobre `frame-ancestors`. Um atacante com o cofre cifrado pode tentar força bruta offline: use senha longa. A área de transferência é compartilhada com outros apps. Quem controlar o repositório/Pages pode publicar código alterado: use um repositório protegido e confira os commits.
+> ⚠️ **Muito importante:** se você esquecer a senha mestra e não tiver um backup, **ninguém consegue abrir o cofre de novo**, nem eu. Anote a senha num lugar seguro.
+
+### 3. Adicione uma conta
+Clique em **+ Adicionar**. Você pode:
+- **escanear o QR Code** que o site mostra (com a câmera, ou usando uma foto/print do QR);
+- **colar o link** que começa com `otpauth://`;
+- **digitar a chave** (uma sequência de letras e números) que o site fornece.
+
+Exemplo com o Google: entre na sua conta Google, abra **Segurança → Verificação em duas etapas → Aplicativo autenticador** e escaneie o QR que aparecer.
+
+### 4. Use o código
+Cada conta mostra um código que muda a cada 30 segundos. A barra azul mostra quanto tempo falta.
+- **Mostrar/Ocultar:** mostra ou esconde o código.
+- **Copiar:** copia o código para você colar no site.
+- Digite o código na página oficial (por exemplo, a do Google). O app **nunca** entra na sua conta por você.
+
+### 5. Faça um backup
+Clique em **Backup**, digite a senha mestra e escolha uma senha para o backup (pode ser diferente). O app baixa um arquivo chamado `webauth-vault.wv`, que é **trancado com senha**. Guarde esse arquivo num lugar seguro, fora do celular (por exemplo, no e-mail ou num pen drive). Faça um backup novo sempre que adicionar uma conta.
+
+### 6. Recupere o backup
+Se trocar de aparelho ou apagar o cofre: crie um cofre novo, clique em **Backup**, escolha o arquivo `.wv`, digite a **senha do backup** e clique em **Importar**.
+
+### 7. Use sem Internet
+Depois da primeira visita, o app funciona mesmo sem Internet.
+
+### 8. Apague tudo
+Na tela de desbloqueio, clique em **Apagar cofre deste navegador**. Isso apaga as contas daquele aparelho. Sem backup, não dá para desfazer.
+
+---
+
+## 🛡️ Como seu cofre é protegido
+
+- Sua senha mestra **nunca é guardada**. Ela só serve para trancar e destrancar o cofre.
+- As suas contas ficam **embaralhadas** (criptografadas) dentro do navegador. Sem a senha, o conteúdo parece só letras sem sentido.
+- Depois de **2 minutos sem uso**, o cofre se tranca sozinho.
+- O app não usa Google Analytics, anúncios, cookies de rastreamento nem servidor próprio.
+
+---
+
+## ⚠️ O que o app NÃO consegue fazer
+
+Nenhum programa é 100% seguro. Fique atento:
+- Se o aparelho tiver **vírus** ou uma extensão maliciosa, o cofre aberto pode ser espiado.
+- Se alguém pegar o seu aparelho com o cofre **destrancado**, vai ver os códigos. Tranque com o botão **Bloquear** quando sair.
+- O navegador pode apagar os dados do site (por exemplo, ao limpar o histórico). **Por isso o backup é tão importante.**
+- Use uma senha mestra **longa**. Quanto maior, mais difícil de adivinhar.
+- Cuidado com o botão Copiar: o código copiado fica na área de transferência, que outros programas podem ler.
+
+---
+
+## 📋 Resumo rápido
+
+| Quero... | Faço assim |
+|---|---|
+| Começar | Crio o cofre com uma senha mestra longa |
+| Adicionar conta | **+ Adicionar** e escaneio o QR |
+| Pegar o código | **Copiar** ou **Mostrar/Ocultar** |
+| Guardar com segurança | **Backup** e guardo o arquivo `.wv` |
+| Recuperar | Crio um cofre novo e uso **Importar** |
+| Sair com segurança | Clico em **Bloquear** |
+
+---
+
+## 👩‍💻 Para quem publica o projeto (GitHub Pages)
+
+1. Crie um repositório **público** no GitHub e envie os arquivos para a raiz dele.
+2. Vá em **Settings → Pages**, escolha **Deploy from a branch**, branch **main**, pasta **/ (root)** e clique em **Save**.
+3. Espere cerca de 1 a 3 minutos. O endereço será parecido com `https://usuario.github.io/nome-do-repositorio/`.
+
+**Testar no seu computador:** abra um terminal na pasta do projeto, rode `python3 -m http.server 8000` e acesse `http://localhost:8000/`.
+
+**Atualizar:** edite os arquivos e, em `service-worker.js`, aumente o número da linha `const VERSION` (por exemplo, de `wv-v9` para `wv-v10`). Faça o commit e recarregue o site duas vezes.
+
+**Arquivos do projeto:** `index.html`, `css/style.css`, `js/` (`app.js`, `crypto.js`, `totp.js`, `vault.js`, `qr.js` e a pasta `vendor/`), `manifest.json`, `service-worker.js` e `icons/`.
+
+---
+
+## 🔧 Detalhes técnicos
+
+- **Cofre:** a senha mestra passa por PBKDF2-HMAC-SHA-256 (600.000 iterações, salt aleatório de 16 bytes) e gera uma chave AES-256-GCM não extraível. Cada gravação usa um IV aleatório novo de 12 bytes. Os dados cifrados ficam no `localStorage`.
+- **Por que PBKDF2 e não Argon2id:** Argon2id exigiria código de terceiros (WebAssembly). Optei só pela Web Crypto nativa do navegador, que tem menos superfície de ataque. Em troca, PBKDF2 resiste menos a ataques com placas de vídeo, por isso a senha mestra deve ser longa.
+- **TOTP (RFC 6238):** SHA-1, SHA-256 e SHA-512, com 6 ou 8 dígitos e período configurável. Conferido com os vetores de teste da RFC.
+- **QR Code:** leitura com jsQR 1.4.0 e geração com qrcode-generator 1.4.4, ambas copiadas para `js/vendor/` (sem CDN) e processadas localmente.
+- **Proteção da página:** CSP via `<meta>` (sem scripts inline, sem `eval`, `connect-src 'self'`); a interface usa `textContent` e `createElement`, nunca `innerHTML`.
+- **Backup:** arquivo `.wv` cifrado com salt e IV próprios, com senha independente da senha mestra. Na importação, o app valida o formato, limita as iterações (100 mil a 5 milhões) e o tamanho do arquivo.
+- **Service worker:** rede primeiro, cache apenas como reserva offline; só atende pedidos GET do mesmo site e nunca guarda backups.
+- **Não implementado:** WebAuthn/Passkeys (era opcional). Se for adicionado, servirá só como desbloqueio extra da interface, sem substituir a criptografia do cofre.
+- **Revisão de segurança:** foi uma autoanálise, **não** uma auditoria independente. Confira os commits do repositório e proteja sua conta do GitHub, porque quem controla o repositório controla o código que roda no navegador.
+
+---
+
+## 🆘 Esqueci a senha mestra
+
+Sem a senha mestra e sem um backup válido, o cofre **não pode ser recuperado**. O app não tem senha de administrador nem acesso secreto, de propósito.
