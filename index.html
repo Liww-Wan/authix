@@ -16,8 +16,8 @@
 <main id="lock" class="card" hidden>
   <h1>WebAuth Vault</h1>
   <p id="lockInfo" class="muted"></p>
-  <input id="pw" type="password" placeholder="Senha mestra" autocomplete="off">
-  <input id="pw2" type="password" placeholder="Confirmar senha mestra" autocomplete="off">
+  <input id="pw" class="secret" type="text" placeholder="Senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+  <input id="pw2" class="secret" type="text" placeholder="Confirmar senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
   <button id="unlockBtn" class="primary"></button>
   <p id="msg" class="err" role="alert"></p>
   <p class="muted small">Se esquecer a senha mestra e não tiver um backup válido, o cofre será irrecuperável. Não existe backdoor.</p>
@@ -45,7 +45,7 @@
   <input id="fUri" placeholder="otpauth://totp/… (opcional)" autocomplete="off">
   <input id="fIssuer" placeholder="Serviço (ex.: Google)" autocomplete="off">
   <input id="fName" placeholder="Usuário / e-mail" autocomplete="off">
-  <input id="fSecret" type="password" placeholder="Chave secreta (Base32)" autocomplete="off">
+  <input id="fSecret" class="secret" type="text" placeholder="Chave secreta (Base32)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
   <div class="row">
     <select id="fAlg"><option>SHA1</option><option>SHA256</option><option>SHA512</option></select>
     <select id="fDig"><option>6</option><option>8</option></select>
@@ -59,13 +59,13 @@
 <dialog id="dlgBk">
   <h2>Backup</h2>
   <p class="muted small">Exportar (arquivo .wv criptografado). Confirme a senha mestra e escolha a senha do backup (pode ser diferente).</p>
-  <input id="bMaster" type="password" placeholder="Senha mestra" autocomplete="off">
-  <input id="bPw" type="password" placeholder="Senha do backup" autocomplete="off">
+  <input id="bMaster" class="secret" type="text" placeholder="Senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+  <input id="bPw" class="secret" type="text" placeholder="Senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
   <button id="bExport" class="primary">Exportar</button>
   <hr>
   <p class="muted small">Importar (as contas são mescladas ao cofre atual).</p>
   <input id="bFile" type="file" accept=".wv,application/json">
-  <input id="bImpPw" type="password" placeholder="Senha do backup" autocomplete="off">
+  <input id="bImpPw" class="secret" type="text" placeholder="Senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
   <button id="bImport">Importar</button>
   <p id="bMsg" class="err" role="alert"></p>
   <button id="bClose">Fechar</button>
