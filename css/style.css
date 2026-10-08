@@ -39,4 +39,10 @@ dialog[open]{display:flex;flex-direction:column;gap:12px;margin:auto;max-height:
 dialog::backdrop{background:#0008}
 dialog h2{margin:0 0 4px}
 dialog p{margin:0}
-dialog
+dialog hr{width:100%;border:0;border-top:1px solid var(--bd);margin:14px 0}
+dialog input,dialog select,dialog button{width:100%}
+dialog .row>*{width:auto}
+video,#accQr{width:100%;border-radius:8px}
+#accQr{max-width:260px;background:#fff;padding:8px;align-self:center}
+
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px}
