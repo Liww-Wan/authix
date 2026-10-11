@@ -5,8 +5,7 @@ const $ = id => document.getElementById(id);
 const h = (t, p = {}, ...k) => { const e = document.createElement(t); for (const [a, v] of Object.entries(p)) a === 'class' ? e.className = v : a.startsWith('on') ? e.addEventListener(a.slice(2), v) : e.setAttribute(a, v); e.append(...k); return e; };
 const ico = c => h('i', { class: c, 'aria-hidden': 'true' });
 const LOCK_MS = 120000;
-// Navegadores sem -webkit-text-security (ex.: Firefox) mostrariam a senha em texto puro: usa type=password.
-if (!(window.CSS && CSS.supports('-webkit-text-security', 'disc'))) document.querySelectorAll('.secret').forEach(i => { i.type = 'password'; });
+// Campos sensíveis usam type=password nativo em todos os navegadores.
 let idle, timer, rows = [], shown = new Set(), stopCam = null, editing = null;
 const toast = m => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2500); };
 const view = id => { $('lock').hidden = id !== 'lock'; $('app').hidden = id !== 'app'; document.body.classList.toggle('locked', id === 'lock'); };
@@ -114,6 +113,9 @@ async function saveAcc() {
     if ($('fUri').value.trim()) fromUri($('fUri').value);
     const secret = $('fSecret').value.replace(/\s/g, '').toUpperCase(), name = $('fName').value.trim(), issuer = $('fIssuer').value.trim();
     T.b32decode(secret);
+    if (secret.length > 512 || name.length > 320 || issuer.length > 200) throw new Error('Nome, serviço ou chave excede o limite permitido.');
+    if (!['SHA1', 'SHA256', 'SHA512'].includes($('fAlg').value)) throw new Error('Algoritmo inválido.');
+    if (![6, 8].includes(parseInt($('fDig').value, 10))) throw new Error('Quantidade de dígitos inválida.');
     if (!name && !issuer) throw new Error('Informe o serviço ou o usuário.');
     const period = parseInt($('fPer').value, 10);
     if (!(period >= 5 && period <= 300)) throw new Error('Período inválido.');

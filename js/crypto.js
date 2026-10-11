@@ -5,6 +5,9 @@ export const b64 = u => { let s = ''; u.forEach(b => s += String.fromCharCode(b)
 export const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 export const rnd = n => crypto.getRandomValues(new Uint8Array(n));
 export async function deriveKey(pw, salt, iter = ITER) {
+  if (typeof pw !== 'string' || pw.length > 1024) throw new Error('Senha inválida');
+  if (!(salt instanceof Uint8Array) || salt.length !== 16) throw new Error('Salt inválido');
+  if (!Number.isSafeInteger(iter) || iter < 100000 || iter > 1000000) throw new Error('Parâmetros de derivação inválidos');
   const base = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
   return crypto.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter },
     base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']); // chave não-extraível
