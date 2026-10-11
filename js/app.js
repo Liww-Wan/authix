@@ -3,7 +3,10 @@ import * as T from './totp.js';
 import * as Q from './qr.js';
 const $ = id => document.getElementById(id);
 const h = (t, p = {}, ...k) => { const e = document.createElement(t); for (const [a, v] of Object.entries(p)) a === 'class' ? e.className = v : a.startsWith('on') ? e.addEventListener(a.slice(2), v) : e.setAttribute(a, v); e.append(...k); return e; };
+const ico = c => h('i', { class: c, 'aria-hidden': 'true' });
 const LOCK_MS = 120000;
+// Navegadores sem -webkit-text-security (ex.: Firefox) mostrariam a senha em texto puro: usa type=password.
+if (!(window.CSS && CSS.supports('-webkit-text-security', 'disc'))) document.querySelectorAll('.secret').forEach(i => { i.type = 'password'; });
 let idle, timer, rows = [], shown = new Set(), stopCam = null, editing = null;
 const toast = m => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2500); };
 const view = id => { $('lock').hidden = id !== 'lock'; $('app').hidden = id !== 'app'; document.body.classList.toggle('locked', id === 'lock'); };
@@ -23,6 +26,8 @@ function showLock() {
   const ex = V.exists(); view('lock');
   $('pw2').hidden = ex; $('wipeBtn').hidden = !ex;
   $('unlockBtn').textContent = ex ? 'Desbloquear' : 'Criar cofre';
+  $('lockTitle').textContent = ex ? 'Cofre Authix' : 'Crie seu cofre';
+  $('lockHint').textContent = ex ? 'Se esquecer a senha mestra e não tiver um backup válido, o cofre será irrecuperável. Não existe backdoor.' : 'Depois de criar o cofre, adicione contas por QR Code ou importe um backup .wv. Se esquecer a senha e não tiver backup, não há recuperação.';
   $('lockInfo').textContent = ex ? 'Digite a senha mestra.' : 'Crie uma senha mestra forte (mín. 12 caracteres).';
   $('pw').value = $('pw2').value = $('msg').textContent = '';
 }
@@ -68,10 +73,10 @@ function render() {
       h('div', { class: 'svc' }, a.issuer || a.name), h('div', { class: 'usr' }, a.issuer ? a.name : ''),
       code, h('div', { class: 'bar' }, bar),
       h('div', { class: 'row' },
-        h('button', { onclick: () => copy(r) }, 'Copiar'),
-        h('button', { onclick: () => { shown.has(a.id) ? shown.delete(a.id) : shown.add(a.id); paint(r); } }, 'Mostrar/Ocultar'),
-        h('button', { onclick: () => openAcc(a) }, 'Editar'),
-        h('button', { class: 'danger', onclick: async () => { if (confirm(`Excluir "${a.issuer || a.name}"?`)) { await V.remove(a.id); shown.delete(a.id); render(); } } }, 'Excluir'))));
+        h('button', { onclick: () => copy(r) }, ico('fa-regular fa-copy'), h('span', {}, 'Copiar')),
+        h('button', { onclick: () => { shown.has(a.id) ? shown.delete(a.id) : shown.add(a.id); paint(r); } }, ico('fa-regular fa-eye'), h('span', {}, 'Mostrar')),
+        h('button', { onclick: () => openAcc(a) }, ico('fa-solid fa-pen'), h('span', {}, 'Editar')),
+        h('button', { class: 'danger', onclick: async () => { if (confirm(`Excluir "${a.issuer || a.name}"?`)) { await V.remove(a.id); shown.delete(a.id); render(); } } }, ico('fa-solid fa-trash'), h('span', {}, 'Excluir')))));
     rows.push(r);
   }
   tick();
@@ -130,7 +135,7 @@ async function doExport() {
       const bp = $('bPw').value;
       if (bp.length < 12) throw new Error('A senha do backup deve ter ao menos 12 caracteres.');
       await V.verify($('bMaster').value);
-      download('webauth-vault.wv', await V.exportBackup(bp));
+      download('authix-backup.wv', await V.exportBackup(bp));
       closeBackup(); toast('Backup exportado');
     } catch (e) { $('bMsg').textContent = e.message; }
   });
@@ -151,7 +156,7 @@ $('unlockBtn').onclick = go;
 for (const i of ['pw', 'pw2']) $(i).addEventListener('keydown', e => e.key === 'Enter' && go());
 $('wipeBtn').onclick = () => { if (confirm('Apagar PERMANENTEMENTE o cofre deste navegador? Sem backup, não há recuperação.')) { V.wipe(); showLock(); } };
 $('lockBtn').onclick = lock;
-$('addBtn').onclick = () => openAcc(null);
+$('addBtn').onclick = $('emptyAdd').onclick = () => openAcc(null);
 $('search').oninput = render;
 $('accCancel').onclick = () => { stopCamera(); $('fSecret').value = ''; $('dlgAcc').close(); };
 $('dlgAcc').addEventListener('close', stopCamera);
@@ -163,7 +168,7 @@ $('camBtn').onclick = async () => {
   catch { $('cam').hidden = true; $('accMsg').textContent = 'Câmera indisponível ou permissão negada.'; }
 };
 $('accQrBtn').onclick = () => { $('accQr').src = Q.makeQR(T.buildUri(editing)); $('accQr').hidden = false; };
-$('backupBtn').onclick = () => { $('bMsg').textContent = ''; $('dlgBk').hidden = false; $('dlgBk').showModal(); };
+$('backupBtn').onclick = $('emptyImport').onclick = () => { $('bMsg').textContent = ''; $('dlgBk').hidden = false; $('dlgBk').showModal(); };
 $('bClose').onclick = closeBackup;
 $('bExport').onclick = doExport;
 $('bImport').onclick = doImport;

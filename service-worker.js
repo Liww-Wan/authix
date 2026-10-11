@@ -1,11 +1,13 @@
 // Rede primeiro (pega sempre a versão nova); cache só quando estiver offline.
 // Incremente VERSION a cada atualização do projeto.
-const VERSION = 'wv-v9';
+const VERSION = 'authix-v10';
 const ASSETS = [
   './', 'index.html', 'css/style.css',
   'js/app.js', 'js/crypto.js', 'js/totp.js', 'js/vault.js', 'js/qr.js',
   'js/vendor/jsQR.js', 'js/vendor/qrcode.js',
-  'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png'
+  'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png',
+  'assets/logo.png', 'assets/favicon.png', 'assets/fa/css/fa.min.css',
+  'assets/fa/webfonts/fa-solid-900.woff2', 'assets/fa/webfonts/fa-regular-400.woff2', 'assets/fa/webfonts/fa-brands-400.woff2'
 ];
 
 self.addEventListener('install', e => {

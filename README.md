@@ -1,4 +1,4 @@
-# 🔐 WebAuth Vault
+# 🔐 Authix
 
 Um **cofre de códigos de segurança** que funciona direto no navegador. Ele gera aqueles códigos de 6 números que mudam a cada 30 segundos, usados para entrar em contas como Google, Microsoft e GitHub com mais segurança.
 
@@ -31,13 +31,13 @@ Clique em **+ Adicionar**. Você pode:
 Exemplo com o Google: entre na sua conta Google, abra **Segurança → Verificação em duas etapas → Aplicativo autenticador** e escaneie o QR que aparecer.
 
 ### 4. Use o código
-Cada conta mostra um código que muda a cada 30 segundos. A barra azul mostra quanto tempo falta.
+Cada conta mostra um código que muda a cada 30 segundos. A barra branca mostra quanto tempo falta.
 - **Mostrar/Ocultar:** mostra ou esconde o código.
 - **Copiar:** copia o código para você colar no site.
 - Digite o código na página oficial (por exemplo, a do Google). O app **nunca** entra na sua conta por você.
 
 ### 5. Faça um backup
-Clique em **Backup**, digite a senha mestra e escolha uma senha para o backup (pode ser diferente). O app baixa um arquivo chamado `webauth-vault.wv`, que é **trancado com senha**. Guarde esse arquivo num lugar seguro, fora do celular (por exemplo, no e-mail ou num pen drive). Faça um backup novo sempre que adicionar uma conta.
+Clique em **Backup**, digite a senha mestra e escolha uma senha para o backup (pode ser diferente). O app baixa um arquivo chamado `authix-backup.wv`, que é **trancado com senha**. Guarde esse arquivo num lugar seguro, fora do celular (por exemplo, no e-mail ou num pen drive). Faça um backup novo sempre que adicionar uma conta.
 
 ### 6. Recupere o backup
 Se trocar de aparelho ou apagar o cofre: crie um cofre novo, clique em **Backup**, escolha o arquivo `.wv`, digite a **senha do backup** e clique em **Importar**.
