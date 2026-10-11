@@ -88,6 +88,7 @@ async function tick() {
   for (const r of rows) {
     const p = r.a.period || 30, c = Math.floor(now / 1000 / p);
     r.bar.style.width = (100 - ((now / 1000) % p) / p * 100) + '%';
+    r.code.classList.toggle('low', p - ((now / 1000) % p) <= 5);
     if (c !== r.ctr) { r.ctr = c; try { r.val = await T.code(r.a, now); } catch { r.val = ''; } paint(r); }
   }
 }

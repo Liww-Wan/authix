@@ -18,7 +18,7 @@ body{margin:0;min-height:100%;display:flex;flex-direction:column;background:var(
 [hidden]{display:none!important}
 a{color:inherit;text-decoration:none}
 :focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:8px}
-.wrap{width:100%;max-width:760px;margin:0 auto;padding:0 20px}
+.wrap{width:100%;max-width:1080px;margin:0 auto;padding:0 24px}
 
 /* topo */
 .top .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
@@ -29,7 +29,13 @@ a{color:inherit;text-decoration:none}
 .gh:hover{color:var(--fg);border-color:var(--bd2)}
 .gh i{font-size:18px}
 
-.stage{flex:1;width:100%;max-width:760px;margin:0 auto;padding:20px 20px 56px}
+.stage{flex:1;display:flex;align-items:center;padding:48px 0 72px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:72px;align-items:center}
+.hero h1{font:600 clamp(38px,5.4vw,60px)/1.06 var(--brand);letter-spacing:-.01em;margin:0 0 22px;max-width:12ch}
+.lead{color:var(--mut);font-size:18px;max-width:42ch;margin:0 0 36px}
+.points{list-style:none;margin:0;padding:0;display:grid;gap:14px;font-size:15px}
+.points li{display:flex;align-items:center;gap:14px;background:none;border:0;border-radius:0;padding:0}
+.points i{width:20px;text-align:center;color:var(--mut)}
 
 /* controles */
 input,select,button,.btn{font:inherit;font-size:15px;color:var(--fg);background:#000;border:1px solid var(--bd);border-radius:10px;padding:12px 14px;min-width:0}
@@ -48,32 +54,39 @@ button:disabled{opacity:.5;cursor:default}
 .secret{-webkit-text-security:disc;text-security:disc}
 input[type=file]{padding:10px}
 
-/* desbloqueio */
-.card{display:flex;flex-direction:column;gap:12px;max-width:420px;margin:6vh auto 0;padding:28px;background:var(--card);border:1px solid var(--bd);border-radius:20px}
-.card h1{margin:0;font:600 28px/1.1 var(--brand)}
-.card p{margin:0}
-.badge{width:48px;height:48px;border:1px solid var(--bd);border-radius:50%;display:grid;place-items:center;font-size:18px;margin-bottom:4px}
+/* painel */
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:20px;overflow:hidden;min-width:0}
+.panel-head{padding:18px 22px;border-bottom:1px solid var(--bd)}
+.panel-head h2{margin:0;font:600 17px/1 var(--brand);display:flex;align-items:center;gap:10px}
+.lockbox{display:flex;flex-direction:column;gap:12px;padding:26px 22px}
+.lockbox h3{margin:0;font:600 24px/1.15 var(--brand)}
+.lockbox p{margin:0}
 #wipeBtn{margin-top:6px}
 
 /* barra de ferramentas */
-.bar-top{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
-.search{position:relative;flex:1 1 220px}
+.bar-top{display:flex;flex-wrap:wrap;gap:10px;padding:18px 22px;border-bottom:1px solid var(--bd)}
+.bar-top{flex-wrap:nowrap}
+.bar-top .tool span{display:none}
+.bar-top .tool{padding:12px 14px}
+.search{position:relative;flex:1 1 120px}
 .search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--mut);font-size:14px;pointer-events:none}
 .search input{padding-left:40px}
 
 /* contas */
-ul{list-style:none;padding:0;margin:0;display:grid;gap:12px}
-li{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px 20px;display:grid;gap:6px}
+ul{list-style:none;padding:0;margin:0}
+#list li{border-bottom:1px solid var(--bd);padding:18px 22px;display:grid;gap:6px}
+#list li:last-child{border-bottom:0}
 .svc{font-weight:600;font-size:16px}
 .usr{color:var(--mut);font-size:14px;overflow-wrap:anywhere}
-.code{font:600 2.1rem/1.2 var(--brand);letter-spacing:.1em;font-variant-numeric:tabular-nums;cursor:pointer;width:max-content;max-width:100%;padding:2px 0}
+.code{font:600 2rem/1.2 var(--brand);letter-spacing:.1em;font-variant-numeric:tabular-nums;cursor:pointer;width:max-content;max-width:100%;padding:2px 0}
+.code.low{color:var(--er)}
 .bar{height:3px;background:var(--bd);border-radius:2px;overflow:hidden;margin:6px 0 8px}
 .bar i{display:block;height:100%;background:#fff}
 .row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}
-li .row button{padding:9px 10px;font-size:14px;color:var(--mut)}
-li .row button:hover{color:var(--fg)}
-li .row .danger{color:var(--er)}
-.empty{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:48px 20px;border:1px dashed var(--bd2);border-radius:16px;color:var(--mut)}
+#list li .row button{padding:9px 10px;font-size:14px;color:var(--mut)}
+#list li .row button:hover{color:var(--fg)}
+#list li .row .danger{color:var(--er)}
+.empty{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:44px 22px;color:var(--mut)}
 .empty>i{font-size:28px}
 .empty p{margin:0}
 .empty .row{justify-content:center}.empty .row>*{flex:0 1 auto}
@@ -103,11 +116,16 @@ video,#accQr{width:100%;border-radius:10px}
 .foot a:hover{color:var(--fg)}
 .foot .links{display:flex;gap:22px;flex-wrap:wrap}
 
+@media (max-width:860px){
+  .stage{padding:28px 0 56px;align-items:flex-start}
+  .grid{grid-template-columns:1fr;gap:36px}
+  .hero h1{max-width:none}
+  .lead{margin-bottom:0}
+  .points{display:none}
+}
 @media (max-width:520px){
   .brand img{height:34px}.brand span{font-size:24px}
   .gh span{display:none}.gh{padding:10px 12px}
-  .bar-top .tool span{display:none}
-  .card{padding:22px;margin-top:2vh}
   .code{font-size:1.8rem}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}

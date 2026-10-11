@@ -23,49 +23,66 @@
       <span>Authix</span>
     </a>
     <a class="gh" href="https://github.com/Liww-Wan/authix" target="_blank" rel="noopener noreferrer">
-      <i class="fa-brands fa-github" aria-hidden="true"></i><span>GitHub</span>
+      <i class="fa-brands fa-github" aria-hidden="true"></i><span>Código no GitHub</span>
     </a>
   </div>
 </header>
 
 <div class="stage">
+  <div class="wrap grid">
+    <section class="hero">
+      <h1>Seus códigos 2FA, só no seu navegador.</h1>
+      <p class="lead">Adicione suas contas e gere códigos de verificação de 6 dígitos. Nada é enviado para servidores.</p>
+      <ul class="points">
+        <li><i class="fa-solid fa-lock" aria-hidden="true"></i>Cofre protegido por senha mestra</li>
+        <li><i class="fa-solid fa-eye-slash" aria-hidden="true"></i>Sem rastreadores nem cadastro</li>
+        <li><i class="fa-solid fa-file-shield" aria-hidden="true"></i>Backup criptografado para guardar com você</li>
+        <li><i class="fa-solid fa-code" aria-hidden="true"></i>Código aberto sob licença MIT</li>
+      </ul>
+    </section>
 
-  <!-- Tela de desbloqueio / criação do cofre -->
-  <main id="lock" class="card" hidden>
-    <div class="badge"><i class="fa-solid fa-lock" aria-hidden="true"></i></div>
-    <h1 id="lockTitle">Cofre Authix</h1>
-    <p id="lockInfo" class="muted"></p>
-    <input id="pw" class="secret" type="text" placeholder="Senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-    <input id="pw2" class="secret" type="text" placeholder="Confirmar senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-    <button id="unlockBtn" class="primary"></button>
-    <p id="msg" class="err" role="alert"></p>
-    <p id="lockHint" class="muted small"></p>
-    <button id="wipeBtn" class="danger"><i class="fa-solid fa-trash" aria-hidden="true"></i><span>Apagar cofre deste navegador</span></button>
-  </main>
-
-  <!-- Tela principal -->
-  <main id="app" hidden>
-    <div class="bar-top">
-      <div class="search">
-        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-        <input id="search" type="search" placeholder="Pesquisar contas" autocomplete="off" aria-label="Pesquisar contas">
+    <section class="panel" aria-labelledby="t-cofre">
+      <div class="panel-head">
+        <h2 id="t-cofre"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Seu cofre</h2>
       </div>
-      <button id="addBtn" class="primary"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Adicionar</span></button>
-      <button id="backupBtn" class="tool" aria-label="Backup" title="Backup"><i class="fa-solid fa-box-archive" aria-hidden="true"></i><span>Backup</span></button>
-      <button id="lockBtn" class="tool" aria-label="Bloquear" title="Bloquear"><i class="fa-solid fa-lock" aria-hidden="true"></i><span>Bloquear</span></button>
-    </div>
 
-    <ul id="list"></ul>
-
-    <div id="empty" class="empty" hidden>
-      <i class="fa-solid fa-key" aria-hidden="true"></i>
-      <p>Seu cofre está vazio.<br>Adicione uma conta com QR Code ou importe um backup.</p>
-      <div class="row">
-        <button id="emptyAdd" class="primary"><i class="fa-solid fa-qrcode" aria-hidden="true"></i><span>Adicionar conta</span></button>
-        <button id="emptyImport"><i class="fa-solid fa-file-import" aria-hidden="true"></i><span>Importar backup</span></button>
+      <!-- Criar / desbloquear cofre -->
+      <div id="lock" class="lockbox" hidden>
+        <h3 id="lockTitle">Cofre Authix</h3>
+        <p id="lockInfo" class="muted"></p>
+        <input id="pw" class="secret" type="text" placeholder="Senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+        <input id="pw2" class="secret" type="text" placeholder="Confirmar senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+        <button id="unlockBtn" class="primary"></button>
+        <p id="msg" class="err" role="alert"></p>
+        <p id="lockHint" class="muted small"></p>
+        <button id="wipeBtn" class="danger"><i class="fa-solid fa-trash" aria-hidden="true"></i><span>Apagar cofre deste navegador</span></button>
       </div>
-    </div>
-  </main>
+
+      <!-- Contas -->
+      <div id="app" hidden>
+        <div class="bar-top">
+          <div class="search">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <input id="search" type="search" placeholder="Pesquisar" autocomplete="off" aria-label="Pesquisar contas">
+          </div>
+          <button id="addBtn" class="primary"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Adicionar</span></button>
+          <button id="backupBtn" class="tool" aria-label="Backup" title="Backup"><i class="fa-solid fa-box-archive" aria-hidden="true"></i><span>Backup</span></button>
+          <button id="lockBtn" class="tool" aria-label="Bloquear" title="Bloquear"><i class="fa-solid fa-lock" aria-hidden="true"></i><span>Bloquear</span></button>
+        </div>
+
+        <ul id="list"></ul>
+
+        <div id="empty" class="empty" hidden>
+          <i class="fa-solid fa-key" aria-hidden="true"></i>
+          <p>Seu cofre está vazio.<br>Adicione uma conta com QR Code ou importe um backup.</p>
+          <div class="row">
+            <button id="emptyAdd" class="primary"><i class="fa-solid fa-qrcode" aria-hidden="true"></i><span>Adicionar conta</span></button>
+            <button id="emptyImport"><i class="fa-solid fa-file-import" aria-hidden="true"></i><span>Importar backup</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <dialog id="dlgAcc">
