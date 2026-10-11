@@ -1,78 +1,277 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; media-src blob:; base-uri 'none'; form-action 'none'">
-<meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#0f172a">
-<title>WebAuth Vault</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="css/style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Authix — Autenticador 2FA</title>
+<meta name="description" content="Authix é um autenticador 2FA de código aberto que roda inteiro no seu navegador.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<style>
+@font-face{
+  font-family:"Engel New Sans";
+  src:local("EngelNewSansTrial-SemiBold"),
+      url("assets/fonts/EngelNewSansTrial-SemiBold.woff2") format("woff2"),
+      url("assets/fonts/EngelNewSansTrial-SemiBold.otf") format("opentype"),
+      url("assets/fonts/EngelNewSansTrial-SemiBold.ttf") format("truetype");
+  font-weight:600;font-style:normal;font-display:swap;
+}
+:root{
+  --bg:#000;--fg:#f4f4f5;--muted:#8b8b92;--line:#202022;--panel:#09090a;--hover:#131315;--danger:#ff6b6b;--ok:#fff;
+  --brand:"Engel New Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{background:var(--bg);color-scheme:dark;height:100%}
+body{margin:0;min-height:100%;display:flex;flex-direction:column;background:var(--bg);color:var(--fg);font:400 16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:6px}
+.wrap{width:100%;max-width:1080px;margin:0 auto;padding:0 24px}
+
+/* topo */
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:76px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand img{height:40px;width:auto;display:block}
+.brand span{font:600 28px/1 var(--brand);letter-spacing:.01em}
+.gh{display:inline-flex;align-items:center;gap:10px;color:var(--muted);font-size:15px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;transition:color .2s,border-color .2s}
+.gh:hover{color:var(--fg);border-color:#3a3a3e}
+.gh i{font-size:18px}
+
+/* conteúdo */
+main{flex:1;display:flex;align-items:center;padding:56px 0 72px}
+main .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:72px;align-items:center}
+h1{font:600 clamp(38px,5.4vw,60px)/1.06 var(--brand);letter-spacing:-.01em;margin:0 0 22px;max-width:12ch}
+.lead{color:var(--muted);font-size:18px;max-width:42ch;margin:0 0 36px}
+.points{list-style:none;margin:0;padding:0;display:grid;gap:14px;color:var(--fg);font-size:15px}
+.points li{display:flex;align-items:center;gap:14px}
+.points i{width:20px;text-align:center;color:var(--muted)}
+
+/* autenticador */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+.panel-head h2{margin:0;font:600 17px/1 var(--brand);display:flex;align-items:center;gap:10px}
+.icon-btn{background:none;border:1px solid var(--line);color:var(--fg);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:14px;transition:background .2s,border-color .2s}
+.icon-btn:hover{background:var(--hover);border-color:#3a3a3e}
+.list{list-style:none;margin:0;padding:0;min-height:128px}
+.item{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.who{min-width:0}
+.who b{display:block;font-weight:500;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who small{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.code{font:600 28px/1 var(--brand);letter-spacing:.08em;font-variant-numeric:tabular-nums;background:none;border:0;color:var(--fg);cursor:pointer;padding:6px 8px;border-radius:8px}
+.code:hover{background:var(--hover)}
+.code.low{color:var(--danger)}
+.ring{width:26px;height:26px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:3}
+.ring .bg{stroke:var(--line)}
+.ring .fg{stroke:var(--fg);stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+.item .del{grid-column:1/-1;display:none}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:34px 22px;color:var(--muted);text-align:center;font-size:15px}
+.empty i{font-size:26px}
+
+form{display:none;padding:20px 22px;border-top:1px solid var(--line);gap:12px;flex-direction:column}
+form.open{display:flex}
+label{font-size:13px;color:var(--muted)}
+input,select{width:100%;background:#000;border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:12px 14px;font:inherit;font-size:15px}
+input:focus,select:focus{outline:none;border-color:#fff}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#000;border:0;border-radius:10px;padding:13px 18px;font:600 15px var(--body);cursor:pointer;transition:opacity .2s}
+.btn:hover{opacity:.88}
+.err{color:var(--danger);font-size:13px;min-height:18px;margin:0}
+.item .rm{background:none;border:0;color:var(--muted);cursor:pointer;padding:6px;border-radius:6px;opacity:0;transition:opacity .2s,color .2s}
+.item:hover .rm,.item .rm:focus-visible{opacity:1}
+.item .rm:hover{color:var(--danger)}
+@media (hover:none){.item .rm{opacity:1}}
+.item{grid-template-columns:1fr auto auto auto}
+
+/* rodapé */
+footer{border-top:1px solid var(--line)}
+footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-top:26px;padding-bottom:26px;color:var(--muted);font-size:14px}
+footer a{display:inline-flex;align-items:center;gap:8px;transition:color .2s}
+footer a:hover{color:var(--fg)}
+footer .links{display:flex;gap:22px;flex-wrap:wrap}
+
+.toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#fff;color:#000;padding:10px 18px;border-radius:999px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:860px){
+  main{padding:32px 0 56px}
+  main .wrap{grid-template-columns:1fr;gap:44px}
+  h1{max-width:none}
+}
+@media (max-width:420px){
+  .brand img{height:34px}.brand span{font-size:24px}
+  .gh span{display:none}.gh{padding:10px 12px}
+  .code{font-size:24px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
 </head>
 <body>
-<main id="lock" class="card" hidden>
-  <h1>WebAuth Vault</h1>
-  <p id="lockInfo" class="muted"></p>
-  <input id="pw" class="secret" type="text" placeholder="Senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-  <input id="pw2" class="secret" type="text" placeholder="Confirmar senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-  <button id="unlockBtn" class="primary"></button>
-  <p id="msg" class="err" role="alert"></p>
-  <p class="muted small">Se esquecer a senha mestra e não tiver um backup válido, o cofre será irrecuperável. Não existe backdoor.</p>
-  <button id="wipeBtn" class="danger">Apagar cofre deste navegador</button>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Authix — início">
+      <img src="assets/logo.png" alt="" width="26" height="40">
+      <span>Authix</span>
+    </a>
+    <a class="gh" href="https://github.com/Liww-Wan/authix" target="_blank" rel="noopener noreferrer">
+      <i class="fa-brands fa-github" aria-hidden="true"></i><span>Código no GitHub</span>
+    </a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section>
+      <h1>Seus códigos 2FA, só no seu navegador.</h1>
+      <p class="lead">Adicione suas contas e gere códigos de verificação de 6 dígitos. Nada é enviado para servidores.</p>
+      <ul class="points">
+        <li><i class="fa-solid fa-lock" aria-hidden="true"></i>Cofre protegido por senha mestra</li>
+        <li><i class="fa-solid fa-eye-slash" aria-hidden="true"></i>Sem rastreadores nem cadastro</li>
+        <li><i class="fa-solid fa-file-shield" aria-hidden="true"></i>Backup criptografado para guardar com você</li>
+        <li><i class="fa-solid fa-code" aria-hidden="true"></i>Código aberto sob licença MIT</li>
+      </ul>
+    </section>
+
+    <section class="panel" aria-labelledby="t-contas">
+      <div class="panel-head">
+        <h2 id="t-contas"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i>Suas contas</h2>
+        <button class="icon-btn" id="toggle" type="button" aria-expanded="false" aria-controls="form" aria-label="Adicionar conta"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+      </div>
+
+      <ul class="list" id="list" aria-live="off"></ul>
+
+      <form id="form" autocomplete="off">
+        <div>
+          <label for="uri">Chave secreta ou link otpauth://</label>
+          <input id="uri" required spellcheck="false" placeholder="JBSWY3DPEHPK3PXP">
+        </div>
+        <div>
+          <label for="name">Nome da conta</label>
+          <input id="name" placeholder="GitHub · voce@email.com">
+        </div>
+        <div class="row">
+          <div><label for="alg">Algoritmo</label>
+            <select id="alg"><option>SHA-1</option><option>SHA-256</option><option>SHA-512</option></select></div>
+          <div><label for="dig">Dígitos</label>
+            <select id="dig"><option>6</option><option>7</option><option>8</option></select></div>
+          <div><label for="per">Período (s)</label>
+            <input id="per" type="number" min="10" max="120" value="30"></div>
+        </div>
+        <p class="err" id="err" role="alert"></p>
+        <button class="btn" type="submit"><i class="fa-solid fa-plus" aria-hidden="true"></i>Adicionar conta</button>
+      </form>
+    </section>
+  </div>
 </main>
 
-<main id="app" hidden>
-  <header>
-    <input id="search" type="search" placeholder="Pesquisar contas…" autocomplete="off">
-    <button id="addBtn" class="primary">+ Adicionar</button>
-    <button id="backupBtn">Backup</button>
-    <button id="lockBtn">Bloquear</button>
-  </header>
-  <ul id="list"></ul>
-  <p id="empty" class="muted" hidden>Nenhuma conta. Clique em “Adicionar”.</p>
-</main>
-
-<dialog id="dlgAcc">
-  <h2 id="accTitle">Conta</h2>
-  <div class="row">
-    <button id="camBtn">Escanear com câmera</button>
-    <label class="btn">Imagem de QR<input id="qrFile" type="file" accept="image/*" hidden></label>
+<footer>
+  <div class="wrap">
+    <span>© <span id="year">2026</span> Authix · Licença MIT</span>
+    <div class="links">
+      <a href="https://github.com/Liww-Wan/authix/blob/main/LICENSE" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i>Licença MIT</a>
+      <a href="https://github.com/Liww-Wan/authix" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github" aria-hidden="true"></i>Liww-Wan/authix</a>
+    </div>
   </div>
-  <video id="cam" playsinline muted hidden></video>
-  <input id="fUri" placeholder="otpauth://totp/… (opcional)" autocomplete="off">
-  <input id="fIssuer" placeholder="Serviço (ex.: Google)" autocomplete="off">
-  <input id="fName" placeholder="Usuário / e-mail" autocomplete="off">
-  <input id="fSecret" class="secret" type="text" placeholder="Chave secreta (Base32)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-  <div class="row">
-    <select id="fAlg"><option>SHA1</option><option>SHA256</option><option>SHA512</option></select>
-    <select id="fDig"><option>6</option><option>8</option></select>
-    <input id="fPer" type="number" min="5" max="300" value="30">
-  </div>
-  <img id="accQr" alt="QR Code da conta" hidden>
-  <p id="accMsg" class="err" role="alert"></p>
-  <div class="row"><button id="accQrBtn">Mostrar QR</button><button id="accCancel">Cancelar</button><button id="accSave" class="primary">Salvar</button></div>
-</dialog>
+</footer>
 
-<dialog id="dlgBk">
-  <h2>Backup</h2>
-  <p class="muted small">Exportar (arquivo .wv criptografado). Confirme a senha mestra e escolha a senha do backup (pode ser diferente).</p>
-  <input id="bMaster" class="secret" type="text" placeholder="Senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-  <input id="bPw" class="secret" type="text" placeholder="Senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-  <button id="bExport" class="primary">Exportar</button>
-  <hr>
-  <p class="muted small">Importar (as contas são mescladas ao cofre atual).</p>
-  <input id="bFile" type="file" accept=".wv,application/json">
-  <input id="bImpPw" class="secret" type="text" placeholder="Senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-  <button id="bImport">Importar</button>
-  <p id="bMsg" class="err" role="alert"></p>
-  <button id="bClose">Fechar</button>
-</dialog>
-<div id="toast" hidden></div>
-<script src="js/vendor/jsQR.js"></script>
-<script src="js/vendor/qrcode.js"></script>
-<script type="module" src="js/app.js"></script>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s), accounts=[], R=2*Math.PI*10;
+$("#year").textContent=new Date().getFullYear();
+
+/* Base32 → bytes */
+function b32(s){
+  const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";s=s.toUpperCase().replace(/[\s=-]/g,"");
+  let bits="",out=[];
+  for(const c of s){const v=A.indexOf(c);if(v<0)throw new Error("Chave inválida. Use apenas letras A–Z e números 2–7.");bits+=v.toString(2).padStart(5,"0")}
+  for(let i=0;i+8<=bits.length;i+=8)out.push(parseInt(bits.slice(i,i+8),2));
+  if(!out.length)throw new Error("Informe a chave secreta.");
+  return new Uint8Array(out);
+}
+/* TOTP (RFC 6238) */
+async function totp(a,t=Date.now()){
+  let c=Math.floor(t/1000/a.period);const buf=new ArrayBuffer(8),v=new DataView(buf);
+  v.setUint32(0,Math.floor(c/2**32));v.setUint32(4,c>>>0);
+  const k=await crypto.subtle.importKey("raw",a.key,{name:"HMAC",hash:a.alg},false,["sign"]);
+  const h=new Uint8Array(await crypto.subtle.sign("HMAC",k,buf)),o=h[h.length-1]&15;
+  const n=((h[o]&127)<<24|h[o+1]<<16|h[o+2]<<8|h[o+3])%10**a.digits;
+  return String(n).padStart(a.digits,"0");
+}
+function parse(input){
+  input=input.trim();
+  const base={alg:$("#alg").value,digits:+$("#dig").value,period:+$("#per").value||30,label:$("#name").value.trim()};
+  if(/^otpauth:\/\//i.test(input)){
+    const u=new URL(input),p=u.searchParams;
+    if(u.hostname!=="totp")throw new Error("Apenas contas TOTP são aceitas.");
+    base.key=b32(p.get("secret")||"");
+    if(p.get("algorithm"))base.alg=p.get("algorithm").toUpperCase().replace(/^SHA(\d)/,"SHA-$1");
+    if(p.get("digits"))base.digits=+p.get("digits");
+    if(p.get("period"))base.period=+p.get("period");
+    if(!base.label)base.label=decodeURIComponent(u.pathname.slice(1));
+  }else base.key=b32(input);
+  if(!["SHA-1","SHA-256","SHA-512"].includes(base.alg))throw new Error("Algoritmo não suportado.");
+  if(!base.label)base.label="Conta sem nome";
+  return base;
+}
+
+/* Interface */
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.id);toast.id=setTimeout(()=>t.classList.remove("show"),1800)}
+function render(){
+  const ul=$("#list");ul.replaceChildren();
+  if(!accounts.length){
+    const li=document.createElement("li");li.className="empty";
+    li.innerHTML='<i class="fa-solid fa-key" aria-hidden="true"></i>';
+    const p=document.createElement("span");p.textContent="Nenhuma conta ainda. Toque em + para adicionar a primeira.";
+    li.append(p);ul.append(li);return;
+  }
+  accounts.forEach((a,i)=>{
+    const li=document.createElement("li");li.className="item";
+    const w=document.createElement("div");w.className="who";
+    const [issuer,...rest]=a.label.split(/[:·]/);
+    const b=document.createElement("b");b.textContent=rest.length?issuer.trim():a.label;
+    const s=document.createElement("small");s.textContent=rest.length?rest.join(" ").trim():a.alg+" · "+a.digits+" dígitos";
+    w.append(b,s);
+    const code=document.createElement("button");code.className="code";code.type="button";code.title="Copiar código";code.dataset.i=i;code.textContent="•".repeat(a.digits);
+    code.onclick=()=>{const v=code.textContent.replace(/\s/g,"");if(/^\d+$/.test(v))navigator.clipboard.writeText(v).then(()=>toast("Código copiado"),()=>toast("Não foi possível copiar"))};
+    const ns="http://www.w3.org/2000/svg",r=document.createElementNS(ns,"svg");r.setAttribute("class","ring");r.setAttribute("viewBox","0 0 24 24");r.setAttribute("aria-hidden","true");
+    r.innerHTML='<circle class="bg" cx="12" cy="12" r="10"/><circle class="fg" cx="12" cy="12" r="10" stroke-dasharray="'+R+'" stroke-dashoffset="0"/>';
+    const rm=document.createElement("button");rm.className="rm";rm.type="button";rm.setAttribute("aria-label","Remover "+a.label);
+    rm.innerHTML='<i class="fa-solid fa-trash" aria-hidden="true"></i>';
+    rm.onclick=()=>{accounts.splice(i,1);render();tick()};
+    li.append(w,code,r,rm);ul.append(li);
+  });
+  tick();
+}
+async function tick(){
+  const now=Date.now(),rows=document.querySelectorAll(".item");
+  for(let i=0;i<rows.length;i++){
+    const a=accounts[i],code=rows[i].querySelector(".code"),fg=rows[i].querySelector(".fg");
+    const left=a.period-((now/1000)%a.period);
+    fg.style.strokeDashoffset=R*(1-left/a.period);
+    code.classList.toggle("low",left<=5);
+    const step=Math.floor(now/1000/a.period);
+    if(a.step!==step){a.step=step;const c=await totp(a,now);const h=Math.ceil(c.length/2);code.textContent=c.slice(0,h)+" "+c.slice(h)}
+  }
+}
+setInterval(tick,250);
+
+$("#toggle").onclick=()=>{const f=$("#form"),o=f.classList.toggle("open");$("#toggle").setAttribute("aria-expanded",o);$("#toggle i").className=o?"fa-solid fa-xmark":"fa-solid fa-plus";if(o)$("#uri").focus()};
+$("#form").onsubmit=async e=>{
+  e.preventDefault();$("#err").textContent="";
+  try{
+    const a=parse($("#uri").value);await totp(a);
+    accounts.push(a);e.target.reset();$("#toggle").click();render();
+  }catch(x){$("#err").textContent=x.message||"Não foi possível adicionar a conta."}
+};
+render();
+})();
+</script>
 </body>
 </html>
