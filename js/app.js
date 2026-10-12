@@ -3,9 +3,7 @@ import * as T from './totp.js';
 import * as Q from './qr.js';
 const $ = id => document.getElementById(id);
 const h = (t, p = {}, ...k) => { const e = document.createElement(t); for (const [a, v] of Object.entries(p)) a === 'class' ? e.className = v : a.startsWith('on') ? e.addEventListener(a.slice(2), v) : e.setAttribute(a, v); e.append(...k); return e; };
-const ico = c => h('i', { class: c, 'aria-hidden': 'true' });
 const LOCK_MS = 120000;
-// Campos sensíveis usam type=password nativo em todos os navegadores.
 let idle, timer, rows = [], shown = new Set(), stopCam = null, editing = null;
 const toast = m => { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2500); };
 const view = id => { $('lock').hidden = id !== 'lock'; $('app').hidden = id !== 'app'; document.body.classList.toggle('locked', id === 'lock'); };
@@ -25,8 +23,6 @@ function showLock() {
   const ex = V.exists(); view('lock');
   $('pw2').hidden = ex; $('wipeBtn').hidden = !ex;
   $('unlockBtn').textContent = ex ? 'Desbloquear' : 'Criar cofre';
-  $('lockTitle').textContent = ex ? 'Cofre Authix' : 'Crie seu cofre';
-  $('lockHint').textContent = ex ? 'Se esquecer a senha mestra e não tiver um backup válido, o cofre será irrecuperável. Não existe backdoor.' : 'Depois de criar o cofre, adicione contas por QR Code ou importe um backup .wv. Se esquecer a senha e não tiver backup, não há recuperação.';
   $('lockInfo').textContent = ex ? 'Digite a senha mestra.' : 'Crie uma senha mestra forte (mín. 12 caracteres).';
   $('pw').value = $('pw2').value = $('msg').textContent = '';
 }
@@ -72,10 +68,10 @@ function render() {
       h('div', { class: 'svc' }, a.issuer || a.name), h('div', { class: 'usr' }, a.issuer ? a.name : ''),
       code, h('div', { class: 'bar' }, bar),
       h('div', { class: 'row' },
-        h('button', { onclick: () => copy(r) }, ico('fa-regular fa-copy'), h('span', {}, 'Copiar')),
-        h('button', { onclick: () => { shown.has(a.id) ? shown.delete(a.id) : shown.add(a.id); paint(r); } }, ico('fa-regular fa-eye'), h('span', {}, 'Mostrar')),
-        h('button', { onclick: () => openAcc(a) }, ico('fa-solid fa-pen'), h('span', {}, 'Editar')),
-        h('button', { class: 'danger', onclick: async () => { if (confirm(`Excluir "${a.issuer || a.name}"?`)) { await V.remove(a.id); shown.delete(a.id); render(); } } }, ico('fa-solid fa-trash'), h('span', {}, 'Excluir')))));
+        h('button', { onclick: () => copy(r) }, 'Copiar'),
+        h('button', { onclick: () => { shown.has(a.id) ? shown.delete(a.id) : shown.add(a.id); paint(r); } }, 'Mostrar/Ocultar'),
+        h('button', { onclick: () => openAcc(a) }, 'Editar'),
+        h('button', { class: 'danger', onclick: async () => { if (confirm(`Excluir "${a.issuer || a.name}"?`)) { await V.remove(a.id); shown.delete(a.id); render(); } } }, 'Excluir'))));
     rows.push(r);
   }
   tick();
@@ -87,7 +83,6 @@ async function tick() {
   for (const r of rows) {
     const p = r.a.period || 30, c = Math.floor(now / 1000 / p);
     r.bar.style.width = (100 - ((now / 1000) % p) / p * 100) + '%';
-    r.code.classList.toggle('low', p - ((now / 1000) % p) <= 5);
     if (c !== r.ctr) { r.ctr = c; try { r.val = await T.code(r.a, now); } catch { r.val = ''; } paint(r); }
   }
 }
@@ -113,9 +108,6 @@ async function saveAcc() {
     if ($('fUri').value.trim()) fromUri($('fUri').value);
     const secret = $('fSecret').value.replace(/\s/g, '').toUpperCase(), name = $('fName').value.trim(), issuer = $('fIssuer').value.trim();
     T.b32decode(secret);
-    if (secret.length > 512 || name.length > 320 || issuer.length > 200) throw new Error('Nome, serviço ou chave excede o limite permitido.');
-    if (!['SHA1', 'SHA256', 'SHA512'].includes($('fAlg').value)) throw new Error('Algoritmo inválido.');
-    if (![6, 8].includes(parseInt($('fDig').value, 10))) throw new Error('Quantidade de dígitos inválida.');
     if (!name && !issuer) throw new Error('Informe o serviço ou o usuário.');
     const period = parseInt($('fPer').value, 10);
     if (!(period >= 5 && period <= 300)) throw new Error('Período inválido.');
@@ -138,7 +130,7 @@ async function doExport() {
       const bp = $('bPw').value;
       if (bp.length < 12) throw new Error('A senha do backup deve ter ao menos 12 caracteres.');
       await V.verify($('bMaster').value);
-      download('authix-backup.wv', await V.exportBackup(bp));
+      download('webauth-vault.wv', await V.exportBackup(bp));
       closeBackup(); toast('Backup exportado');
     } catch (e) { $('bMsg').textContent = e.message; }
   });
@@ -159,7 +151,7 @@ $('unlockBtn').onclick = go;
 for (const i of ['pw', 'pw2']) $(i).addEventListener('keydown', e => e.key === 'Enter' && go());
 $('wipeBtn').onclick = () => { if (confirm('Apagar PERMANENTEMENTE o cofre deste navegador? Sem backup, não há recuperação.')) { V.wipe(); showLock(); } };
 $('lockBtn').onclick = lock;
-$('addBtn').onclick = $('emptyAdd').onclick = () => openAcc(null);
+$('addBtn').onclick = () => openAcc(null);
 $('search').oninput = render;
 $('accCancel').onclick = () => { stopCamera(); $('fSecret').value = ''; $('dlgAcc').close(); };
 $('dlgAcc').addEventListener('close', stopCamera);
@@ -171,7 +163,7 @@ $('camBtn').onclick = async () => {
   catch { $('cam').hidden = true; $('accMsg').textContent = 'Câmera indisponível ou permissão negada.'; }
 };
 $('accQrBtn').onclick = () => { $('accQr').src = Q.makeQR(T.buildUri(editing)); $('accQr').hidden = false; };
-$('backupBtn').onclick = $('emptyImport').onclick = () => { $('bMsg').textContent = ''; $('dlgBk').hidden = false; $('dlgBk').showModal(); };
+$('backupBtn').onclick = () => { $('bMsg').textContent = ''; $('dlgBk').hidden = false; $('dlgBk').showModal(); };
 $('bClose').onclick = closeBackup;
 $('bExport').onclick = doExport;
 $('bImport').onclick = doImport;
