@@ -40,12 +40,17 @@ export async function exportBackup(pw) {
   const e = await C.encryptJSON(k, { accounts });
   return JSON.stringify({ format: 'webauth-vault-backup', v: 1, kdf: 'PBKDF2-HMAC-SHA-256', iter: C.ITER, salt: C.b64(salt), ...e });
 }
+// Lê e decifra um arquivo de backup .wv com a senha informada.
+async function readBackup(text, pw) {
+  let b;
+  try { b = JSON.parse(text); } catch { throw new Error('Arquivo de backup inválido'); }
+  if (!b || b.format !== 'webauth-vault-backup' || !(b.iter >= 100000 && b.iter <= 5e6)) throw new Error('Arquivo de backup inválido');
+  try { return await C.decryptJSON(await C.deriveKey(pw, C.unb64(b.salt), b.iter), b); }
+  catch { throw new Error('Senha do backup incorreta ou arquivo corrompido'); }
+}
 export async function importBackup(text, pw) {
   need();
-  const b = JSON.parse(text);
-  if (b.format !== 'webauth-vault-backup' || !(b.iter >= 100000 && b.iter <= 5e6)) throw new Error('Arquivo de backup inválido');
-  let d;
-  try { d = await C.decryptJSON(await C.deriveKey(pw, C.unb64(b.salt), b.iter), b); } catch { throw new Error('Senha do backup incorreta ou arquivo corrompido'); }
+  const d = await readBackup(text, pw);
   let n = 0;
   for (const a of d.accounts) {
     if (accounts.some(x => x.secret === a.secret && x.issuer === a.issuer && x.name === a.name)) continue;
@@ -53,16 +58,12 @@ export async function importBackup(text, pw) {
   }
   await save(); return n;
 }
-// Gera um novo arquivo .wv com outra senha a partir de um backup existente (o cofre aberto não é alterado).
-export async function changeBackupPassword(text, oldPw, newPw) {
-  let b; try { b = JSON.parse(text); } catch { throw new Error('Arquivo de backup inválido'); }
-  if (b.format !== 'webauth-vault-backup' || !(b.iter >= 100000 && b.iter <= 5e6)) throw new Error('Arquivo de backup inválido');
-  let d;
-  try { d = await C.decryptJSON(await C.deriveKey(oldPw, C.unb64(b.salt), b.iter), b); } catch { throw new Error('Senha atual do backup incorreta ou arquivo corrompido'); }
-  if (!Array.isArray(d.accounts)) throw new Error('Arquivo de backup inválido');
+// Troca a senha de um backup .wv: decifra com a senha atual e cifra de novo com a nova (salt e IV novos).
+// Não mexe no cofre aberto; devolve o texto do novo arquivo.
+export async function rekeyBackup(text, oldPw, newPw) {
+  const d = await readBackup(text, oldPw);
   const salt = C.rnd(16), k = await C.deriveKey(newPw, salt);
-  const e = await C.encryptJSON(k, { accounts: d.accounts });
-  await C.decryptJSON(k, e); // confere que o novo arquivo abre com a nova senha
+  const e = await C.encryptJSON(k, d);
   return JSON.stringify({ format: 'webauth-vault-backup', v: 1, kdf: 'PBKDF2-HMAC-SHA-256', iter: C.ITER, salt: C.b64(salt), ...e });
 }
 export function wipe() { localStorage.removeItem(KEY); lock(); }
