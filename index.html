@@ -52,10 +52,10 @@
         <p id="lockInfo" class="muted"></p>
         <input id="pw" class="secret" type="text" placeholder="Senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
         <input id="pw2" class="secret" type="text" placeholder="Confirmar senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-        <button id="unlockBtn" class="primary"></button>
+        <button id="unlockBtn" class="primary"><i id="unlockIco" class="fa-solid fa-lock-open" aria-hidden="true"></i><span id="unlockTxt"></span></button>
         <p id="msg" class="err" role="alert"></p>
         <p id="lockHint" class="muted small"></p>
-        <button id="wipeBtn" class="danger"><i class="fa-solid fa-trash" aria-hidden="true"></i><span>Apagar cofre deste navegador</span></button>
+        <button id="wipeBtn" class="danger"><i class="fa-solid fa-trash-can" aria-hidden="true"></i><span>Apagar cofre deste navegador</span></button>
       </div>
 
       <!-- Contas -->
@@ -66,7 +66,7 @@
             <input id="search" type="search" placeholder="Pesquisar" autocomplete="off" aria-label="Pesquisar contas">
           </div>
           <button id="addBtn" class="primary"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Adicionar</span></button>
-          <button id="backupBtn" class="tool" aria-label="Backup" title="Backup"><i class="fa-solid fa-box-archive" aria-hidden="true"></i><span>Backup</span></button>
+          <button id="backupBtn" class="tool" aria-label="Backup" title="Backup"><i class="fa-solid fa-file-shield" aria-hidden="true"></i><span>Backup</span></button>
           <button id="lockBtn" class="tool" aria-label="Bloquear" title="Bloquear"><i class="fa-solid fa-lock" aria-hidden="true"></i><span>Bloquear</span></button>
         </div>
 
@@ -103,29 +103,35 @@
   </div>
   <img id="accQr" alt="QR Code da conta" hidden>
   <p id="accMsg" class="err" role="alert"></p>
-  <div class="row"><button id="accQrBtn"><i class="fa-solid fa-qrcode" aria-hidden="true"></i><span>Mostrar QR</span></button><button id="accCancel">Cancelar</button><button id="accSave" class="primary">Salvar</button></div>
+  <div class="row"><button id="accQrBtn"><i class="fa-solid fa-qrcode" aria-hidden="true"></i><span>Mostrar QR</span></button><button id="accCancel"><i class="fa-solid fa-xmark" aria-hidden="true"></i><span>Cancelar</span></button><button id="accSave" class="primary"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span>Salvar</span></button></div>
 </dialog>
 
 <dialog id="dlgBk">
-  <h2>Backup</h2>
-  <p class="muted small">Exportar (arquivo .wv criptografado). Confirme a senha mestra e escolha a senha do backup (pode ser diferente).</p>
+  <h2><i class="fa-solid fa-file-shield" aria-hidden="true"></i>Backup</h2>
+
+  <h3><i class="fa-solid fa-file-export" aria-hidden="true"></i>Exportar</h3>
+  <p class="muted small">Gera um arquivo .wv criptografado. Confirme a senha mestra e escolha a senha do backup (pode ser diferente).</p>
   <input id="bMaster" class="secret" type="text" placeholder="Senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
   <input id="bPw" class="secret" type="text" placeholder="Senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
   <button id="bExport" class="primary"><i class="fa-solid fa-file-export" aria-hidden="true"></i><span>Exportar</span></button>
   <hr>
-  <p class="muted small">Importar (as contas são mescladas ao cofre atual).</p>
-  <input id="bFile" type="file" accept=".wv,application/json">
+
+  <h3><i class="fa-solid fa-file-import" aria-hidden="true"></i>Importar</h3>
+  <p class="muted small">As contas do backup são mescladas ao cofre atual.</p>
+  <input id="bFile" type="file" accept=".wv,application/json" aria-label="Arquivo de backup .wv">
   <input id="bImpPw" class="secret" type="text" placeholder="Senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
   <button id="bImport"><i class="fa-solid fa-file-import" aria-hidden="true"></i><span>Importar</span></button>
   <hr>
-  <p class="muted small">Alterar a senha de um backup (gera um novo arquivo .wv com a nova senha; o arquivo original não é modificado).</p>
-  <input id="bChFile" type="file" accept=".wv,application/json">
-  <input id="bChOld" class="secret" type="text" placeholder="Senha atual do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-  <input id="bChNew" class="secret" type="text" placeholder="Nova senha do backup (mín. 12 caracteres)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-  <input id="bChNew2" class="secret" type="text" placeholder="Confirmar nova senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
-  <button id="bChange"><i class="fa-solid fa-file-pen" aria-hidden="true"></i><span>Gerar backup com nova senha</span></button>
+
+  <h3><i class="fa-solid fa-key" aria-hidden="true"></i>Trocar a senha de um backup</h3>
+  <p class="muted small">Escolha um arquivo .wv, informe a senha atual dele e defina uma nova. É gerado um novo arquivo; o original não é alterado e o cofre não é modificado.</p>
+  <input id="bRekFile" type="file" accept=".wv,application/json" aria-label="Arquivo de backup .wv a ser reprotegido">
+  <input id="bRekOld" class="secret" type="text" placeholder="Senha atual do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+  <input id="bRekNew" class="secret" type="text" placeholder="Nova senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+  <input id="bRekNew2" class="secret" type="text" placeholder="Confirmar nova senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+  <button id="bRekey"><i class="fa-solid fa-key" aria-hidden="true"></i><span>Trocar senha e baixar</span></button>
   <p id="bMsg" class="err" role="alert"></p>
-  <button id="bClose">Fechar</button>
+  <button id="bClose"><i class="fa-solid fa-xmark" aria-hidden="true"></i><span>Fechar</span></button>
 </dialog>
 
 <footer class="foot">

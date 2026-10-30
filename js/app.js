@@ -5,6 +5,7 @@ const $ = id => document.getElementById(id);
 const h = (t, p = {}, ...k) => { const e = document.createElement(t); for (const [a, v] of Object.entries(p)) a === 'class' ? e.className = v : a.startsWith('on') ? e.addEventListener(a.slice(2), v) : e.setAttribute(a, v); e.append(...k); return e; };
 const ico = c => h('i', { class: c, 'aria-hidden': 'true' });
 const LOCK_MS = 120000;
+const BK_FIELDS = ['bMaster', 'bPw', 'bImpPw', 'bRekOld', 'bRekNew', 'bRekNew2'], BK_FILES = ['bFile', 'bRekFile'];
 // Navegadores sem -webkit-text-security (ex.: Firefox) mostrariam a senha em texto puro: usa type=password.
 if (!(window.CSS && CSS.supports('-webkit-text-security', 'disc'))) document.querySelectorAll('.secret').forEach(i => { i.type = 'password'; });
 let idle, timer, rows = [], shown = new Set(), stopCam = null, editing = null;
@@ -25,7 +26,8 @@ function closeDialogs() {
 function showLock() {
   const ex = V.exists(); view('lock');
   $('pw2').hidden = ex; $('wipeBtn').hidden = !ex;
-  $('unlockBtn').textContent = ex ? 'Desbloquear' : 'Criar cofre';
+  $('unlockTxt').textContent = ex ? 'Desbloquear' : 'Criar cofre';
+  $('unlockIco').className = ex ? 'fa-solid fa-lock-open' : 'fa-solid fa-vault';
   $('lockTitle').textContent = ex ? 'Cofre Authix' : 'Crie seu cofre';
   $('lockHint').textContent = ex ? 'Se esquecer a senha mestra e não tiver um backup válido, o cofre será irrecuperável. Não existe backdoor.' : 'Depois de criar o cofre, adicione contas por QR Code ou importe um backup .wv. Se esquecer a senha e não tiver backup, não há recuperação.';
   $('lockInfo').textContent = ex ? 'Digite a senha mestra.' : 'Crie uma senha mestra forte (mín. 12 caracteres).';
@@ -52,8 +54,8 @@ function lock() {
   try { stopCamera(); } catch {}
   $('list').replaceChildren(); $('search').value = '';
   closeDialogs();
-  for (const i of ['fUri', 'fIssuer', 'fName', 'fSecret', 'bMaster', 'bPw', 'bImpPw', 'bChOld', 'bChNew', 'bChNew2']) $(i).value = '';
-  $('bFile').value = ''; $('bChFile').value = ''; $('bMsg').textContent = '';
+  for (const i of ['fUri', 'fIssuer', 'fName', 'fSecret', ...BK_FIELDS]) $(i).value = '';
+  for (const i of BK_FILES) $(i).value = ''; $('bMsg').textContent = '';
   $('accQr').removeAttribute('src'); $('accQr').hidden = true;
   showLock();
 }
@@ -67,22 +69,28 @@ function render() {
   $('empty').hidden = all.length > 0;
   for (const a of items) {
     const code = h('div', { class: 'code', title: 'Clique para copiar' }, '••• •••'), bar = h('i');
-    const r = { a, code, bar, ctr: -1, val: '' };
+    const eye = h('button', { onclick: () => { shown.has(a.id) ? shown.delete(a.id) : shown.add(a.id); paint(r); } }, ico('fa-regular fa-eye'), h('span', {}, 'Mostrar'));
+    const r = { a, code, bar, eye, ctr: -1, val: '' };
     code.addEventListener('click', () => copy(r));
     ul.append(h('li', {},
       h('div', { class: 'svc' }, a.issuer || a.name), h('div', { class: 'usr' }, a.issuer ? a.name : ''),
       code, h('div', { class: 'bar' }, bar),
       h('div', { class: 'row' },
         h('button', { onclick: () => copy(r) }, ico('fa-regular fa-copy'), h('span', {}, 'Copiar')),
-        h('button', { onclick: () => { shown.has(a.id) ? shown.delete(a.id) : shown.add(a.id); paint(r); } }, ico('fa-regular fa-eye'), h('span', {}, 'Mostrar')),
-        h('button', { onclick: () => openAcc(a) }, ico('fa-solid fa-pen'), h('span', {}, 'Editar')),
-        h('button', { class: 'danger', onclick: async () => { if (confirm(`Excluir "${a.issuer || a.name}"?`)) { await V.remove(a.id); shown.delete(a.id); render(); } } }, ico('fa-solid fa-trash'), h('span', {}, 'Excluir')))));
+        eye,
+        h('button', { onclick: () => openAcc(a) }, ico('fa-solid fa-pen-to-square'), h('span', {}, 'Editar')),
+        h('button', { class: 'danger', onclick: async () => { if (confirm(`Excluir "${a.issuer || a.name}"?`)) { await V.remove(a.id); shown.delete(a.id); render(); } } }, ico('fa-solid fa-trash-can'), h('span', {}, 'Excluir')))));
     rows.push(r);
   }
   tick();
 }
 const fmt = (s) => s.slice(0, s.length / 2) + ' ' + s.slice(s.length / 2);
-function paint(r) { r.code.textContent = shown.has(r.a.id) && r.val ? fmt(r.val) : '••• •••'; }
+function paint(r) {
+  const on = shown.has(r.a.id);
+  r.code.textContent = on && r.val ? fmt(r.val) : '••• •••';
+  r.eye.firstChild.className = on ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+  r.eye.lastChild.textContent = on ? 'Ocultar' : 'Mostrar';
+}
 async function tick() {
   const now = Date.now();
   for (const r of rows) {
@@ -125,8 +133,8 @@ async function saveAcc() {
 // --- backup ---
 const download = (name, text) => { const u = URL.createObjectURL(new Blob([text], { type: 'application/octet-stream' })); const a = h('a', { href: u, download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 1000); };
 function closeBackup() {
-  for (const i of ['bMaster', 'bPw', 'bImpPw', 'bChOld', 'bChNew', 'bChNew2']) $(i).value = '';
-  $('bFile').value = ''; $('bChFile').value = ''; $('bMsg').textContent = '';
+  for (const i of BK_FIELDS) $(i).value = '';
+  for (const i of BK_FILES) $(i).value = ''; $('bMsg').textContent = '';
   $('dlgBk').close(); $('dlgBk').hidden = true;
 }
 async function doExport() {
@@ -152,19 +160,18 @@ async function doImport() {
     } catch (e) { $('bMsg').textContent = e.message; }
   });
 }
-async function doChangeBk() {
-  await busy($('bChange'), async () => {
+async function doRekey() {
+  await busy($('bRekey'), async () => {
     $('bMsg').textContent = '';
     try {
-      const f = $('bChFile').files[0]; if (!f) throw new Error('Selecione o arquivo .wv do backup.');
+      const f = $('bRekFile').files[0]; if (!f) throw new Error('Selecione o arquivo .wv do backup');
       if (f.size > 5e6) throw new Error('Arquivo grande demais');
-      const old = $('bChOld').value, nw = $('bChNew').value;
-      if (!old) throw new Error('Digite a senha atual do backup.');
-      if (nw.length < 12) throw new Error('A nova senha do backup deve ter ao menos 12 caracteres.');
-      if (nw !== $('bChNew2').value) throw new Error('As senhas não conferem.');
-      if (nw === old) throw new Error('A nova senha deve ser diferente da atual.');
-      download('authix-backup-nova-senha.wv', await V.changeBackupPassword(await f.text(), old, nw));
-      closeBackup(); toast('Backup gerado com a nova senha');
+      const oldPw = $('bRekOld').value, np = $('bRekNew').value;
+      if (np.length < 12) throw new Error('A nova senha do backup deve ter ao menos 12 caracteres.');
+      if (np !== $('bRekNew2').value) throw new Error('As novas senhas não conferem.');
+      if (np === oldPw) throw new Error('A nova senha deve ser diferente da atual.');
+      download('authix-backup-nova-senha.wv', await V.rekeyBackup(await f.text(), oldPw, np));
+      closeBackup(); toast('Senha do backup alterada');
     } catch (e) { $('bMsg').textContent = e.message; }
   });
 }
@@ -189,7 +196,7 @@ $('backupBtn').onclick = $('emptyImport').onclick = () => { $('bMsg').textConten
 $('bClose').onclick = closeBackup;
 $('bExport').onclick = doExport;
 $('bImport').onclick = doImport;
-$('bChange').onclick = doChangeBk;
+$('bRekey').onclick = doRekey;
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
 closeDialogs();

@@ -100,7 +100,9 @@ dialog[hidden]{display:none!important}
 body.locked dialog{display:none!important}
 dialog[open]{display:flex;flex-direction:column;gap:12px;margin:auto;max-height:90vh;overflow:auto}
 dialog::backdrop{background:rgba(0,0,0,.75)}
-dialog h2{margin:0 0 4px;font:600 22px/1.2 var(--brand)}
+dialog h2{margin:0 0 4px;font:600 22px/1.2 var(--brand);display:flex;align-items:center;gap:10px}
+dialog h3{margin:0;font:600 15px/1.2 var(--brand);display:flex;align-items:center;gap:10px}
+dialog h3 i{width:18px;text-align:center;color:var(--mut)}
 dialog p{margin:0}
 dialog hr{width:100%;border:0;border-top:1px solid var(--bd);margin:12px 0}
 dialog .row>*{width:auto}

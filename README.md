@@ -39,15 +39,16 @@ Cada conta mostra um código que muda a cada 30 segundos. A barra branca mostra 
 ### 5. Faça um backup
 Clique em **Backup**, digite a senha mestra e escolha uma senha para o backup (pode ser diferente). O app baixa um arquivo chamado `authix-backup.wv`, que é **trancado com senha**. Guarde esse arquivo num lugar seguro, fora do celular (por exemplo, no e-mail ou num pen drive). Faça um backup novo sempre que adicionar uma conta.
 
-Para **mudar a senha de um backup** que você já tem, abra **Backup**, na seção "Alterar a senha de um backup", escolha o arquivo `.wv`, digite a senha atual dele e a nova senha (duas vezes). O app gera um arquivo novo, `authix-backup-nova-senha.wv`; o original não é modificado.
-
 ### 6. Recupere o backup
 Se trocar de aparelho ou apagar o cofre: crie um cofre novo, clique em **Backup**, escolha o arquivo `.wv`, digite a **senha do backup** e clique em **Importar**.
 
-### 7. Use sem Internet
+### 7. Troque a senha de um backup
+Na janela **Backup**, na seção **Trocar a senha de um backup**, escolha o arquivo `.wv`, digite a **senha atual** dele e defina uma **nova senha** (mín. 12 caracteres). O app baixa um arquivo novo, `authix-backup-nova-senha.wv`, trancado com a nova senha. O arquivo original e o cofre não são alterados: depois de conferir o novo, apague o antigo para que a senha velha deixe de funcionar em algum lugar esquecido.
+
+### 8. Use sem Internet
 Depois da primeira visita, o app funciona mesmo sem Internet.
 
-### 8. Apague tudo
+### 9. Apague tudo
 Na tela de desbloqueio, clique em **Apagar cofre deste navegador**. Isso apaga as contas daquele aparelho. Sem backup, não dá para desfazer.
 
 ---
@@ -80,6 +81,7 @@ Nenhum programa é 100% seguro. Fique atento:
 | Adicionar conta | **+ Adicionar** e escaneio o QR |
 | Pegar o código | **Copiar** ou **Mostrar/Ocultar** |
 | Guardar com segurança | **Backup** e guardo o arquivo `.wv` |
+| Trocar a senha do backup | **Backup → Trocar a senha de um backup** |
 | Recuperar | Crio um cofre novo e uso **Importar** |
 | Sair com segurança | Clico em **Bloquear** |
 
