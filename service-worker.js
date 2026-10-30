@@ -1,6 +1,6 @@
 // Rede primeiro (pega sempre a versão nova); cache só quando estiver offline.
 // Incremente VERSION a cada atualização do projeto.
-const VERSION = 'authix-v14';
+const VERSION = 'authix-v11';
 const ASSETS = [
   './', 'index.html', 'css/style.css',
   'js/app.js', 'js/crypto.js', 'js/totp.js', 'js/vault.js', 'js/qr.js',
