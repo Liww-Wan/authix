@@ -1,18 +1,20 @@
 // Rede primeiro (pega sempre a versão nova); cache só quando estiver offline.
 // Incremente VERSION a cada atualização do projeto.
-const VERSION = 'authix-v12';
+const VERSION = 'authix-v13';
 const ASSETS = [
   './', 'index.html', 'css/style.css',
   'js/app.js', 'js/crypto.js', 'js/totp.js', 'js/vault.js', 'js/qr.js',
   'js/vendor/jsQR.js', 'js/vendor/qrcode.js',
   'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png',
-  'assets/logo.png', 'assets/favicon.png', 'assets/fa/css/fa.min.css',
+  'assets/logo.png', 'assets/fonts/inter-latin-600.woff2', 'assets/favicon.png', 'assets/fa/css/fa.min.css',
   'assets/fa/webfonts/fa-solid-900.woff2', 'assets/fa/webfonts/fa-regular-400.woff2', 'assets/fa/webfonts/fa-brands-400.woff2'
 ];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(VERSION).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(VERSION)
+      .then(c => Promise.all(ASSETS.map(a => c.add(a).catch(() => {}))))  // um arquivo ausente não impede a instalação
+      .then(() => self.skipWaiting())
   );
 });
 

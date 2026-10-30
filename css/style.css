@@ -1,14 +1,11 @@
 @font-face{
-  font-family:"Engel New Sans";
-  src:local("EngelNewSansTrial-SemiBold"),
-      url("../assets/fonts/EngelNewSansTrial-SemiBold.woff2") format("woff2"),
-      url("../assets/fonts/EngelNewSansTrial-SemiBold.otf") format("opentype"),
-      url("../assets/fonts/EngelNewSansTrial-SemiBold.ttf") format("truetype");
+  font-family:"Inter";
+  src:url("../assets/fonts/inter-latin-600.woff2") format("woff2");
   font-weight:600;font-style:normal;font-display:swap;
 }
 :root{
   --bg:#000;--fg:#f4f4f5;--mut:#8b8b92;--bd:#202022;--bd2:#3a3a3e;--card:#09090a;--hov:#131315;--er:#ff6b6b;
-  --brand:"Engel New Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --brand:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
   --body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color-scheme:dark;
 }
@@ -22,7 +19,7 @@ a{color:inherit;text-decoration:none}
 
 /* topo */
 .top .wrap{display:flex;align-items:center;justify-content:space-between;height:104px}
-.brand{--fs:46px;display:flex;align-items:baseline;gap:14px;font:600 var(--fs)/1 var(--brand);letter-spacing:.01em}
+.brand{--fs:46px;display:flex;align-items:baseline;gap:14px;font:600 var(--fs)/1 var(--brand);letter-spacing:-.01em}
 /* ícone = altura exata das maiúsculas da fonte (1cap); base do ícone sobre a linha de base do texto */
 .brand img{height:.7em;height:1cap;width:auto;display:block}
 .brand span{font:inherit;letter-spacing:inherit}
@@ -32,7 +29,7 @@ a{color:inherit;text-decoration:none}
 
 .stage{flex:1;display:flex;align-items:center;padding:48px 0 72px}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:72px;align-items:center}
-.hero h1{font:600 clamp(38px,5.4vw,60px)/1.06 var(--brand);letter-spacing:-.01em;margin:0 0 22px;max-width:12ch}
+.hero h1{font:600 clamp(38px,5.4vw,60px)/1.06 var(--brand);letter-spacing:-.025em;margin:0 0 22px;max-width:12ch}
 .lead{color:var(--mut);font-size:18px;max-width:42ch;margin:0 0 36px}
 .points{list-style:none;margin:0;padding:0;display:grid;gap:14px;font-size:15px}
 .points li{display:flex;align-items:center;gap:14px;background:none;border:0;border-radius:0;padding:0}
