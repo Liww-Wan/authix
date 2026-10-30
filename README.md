@@ -39,6 +39,8 @@ Cada conta mostra um código que muda a cada 30 segundos. A barra branca mostra 
 ### 5. Faça um backup
 Clique em **Backup**, digite a senha mestra e escolha uma senha para o backup (pode ser diferente). O app baixa um arquivo chamado `authix-backup.wv`, que é **trancado com senha**. Guarde esse arquivo num lugar seguro, fora do celular (por exemplo, no e-mail ou num pen drive). Faça um backup novo sempre que adicionar uma conta.
 
+Para **mudar a senha de um backup** que você já tem, abra **Backup**, na seção "Alterar a senha de um backup", escolha o arquivo `.wv`, digite a senha atual dele e a nova senha (duas vezes). O app gera um arquivo novo, `authix-backup-nova-senha.wv`; o original não é modificado.
+
 ### 6. Recupere o backup
 Se trocar de aparelho ou apagar o cofre: crie um cofre novo, clique em **Backup**, escolha o arquivo `.wv`, digite a **senha do backup** e clique em **Importar**.
 

@@ -117,6 +117,13 @@
   <input id="bFile" type="file" accept=".wv,application/json">
   <input id="bImpPw" class="secret" type="text" placeholder="Senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
   <button id="bImport"><i class="fa-solid fa-file-import" aria-hidden="true"></i><span>Importar</span></button>
+  <hr>
+  <p class="muted small">Alterar a senha de um backup (gera um novo arquivo .wv com a nova senha; o arquivo original não é modificado).</p>
+  <input id="bChFile" type="file" accept=".wv,application/json">
+  <input id="bChOld" class="secret" type="text" placeholder="Senha atual do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+  <input id="bChNew" class="secret" type="text" placeholder="Nova senha do backup (mín. 12 caracteres)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+  <input id="bChNew2" class="secret" type="text" placeholder="Confirmar nova senha do backup" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore>
+  <button id="bChange"><i class="fa-solid fa-file-pen" aria-hidden="true"></i><span>Gerar backup com nova senha</span></button>
   <p id="bMsg" class="err" role="alert"></p>
   <button id="bClose">Fechar</button>
 </dialog>

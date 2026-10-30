@@ -52,8 +52,8 @@ function lock() {
   try { stopCamera(); } catch {}
   $('list').replaceChildren(); $('search').value = '';
   closeDialogs();
-  for (const i of ['fUri', 'fIssuer', 'fName', 'fSecret', 'bMaster', 'bPw', 'bImpPw']) $(i).value = '';
-  $('bFile').value = ''; $('bMsg').textContent = '';
+  for (const i of ['fUri', 'fIssuer', 'fName', 'fSecret', 'bMaster', 'bPw', 'bImpPw', 'bChOld', 'bChNew', 'bChNew2']) $(i).value = '';
+  $('bFile').value = ''; $('bChFile').value = ''; $('bMsg').textContent = '';
   $('accQr').removeAttribute('src'); $('accQr').hidden = true;
   showLock();
 }
@@ -125,8 +125,8 @@ async function saveAcc() {
 // --- backup ---
 const download = (name, text) => { const u = URL.createObjectURL(new Blob([text], { type: 'application/octet-stream' })); const a = h('a', { href: u, download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 1000); };
 function closeBackup() {
-  for (const i of ['bMaster', 'bPw', 'bImpPw']) $(i).value = '';
-  $('bFile').value = ''; $('bMsg').textContent = '';
+  for (const i of ['bMaster', 'bPw', 'bImpPw', 'bChOld', 'bChNew', 'bChNew2']) $(i).value = '';
+  $('bFile').value = ''; $('bChFile').value = ''; $('bMsg').textContent = '';
   $('dlgBk').close(); $('dlgBk').hidden = true;
 }
 async function doExport() {
@@ -152,6 +152,22 @@ async function doImport() {
     } catch (e) { $('bMsg').textContent = e.message; }
   });
 }
+async function doChangeBk() {
+  await busy($('bChange'), async () => {
+    $('bMsg').textContent = '';
+    try {
+      const f = $('bChFile').files[0]; if (!f) throw new Error('Selecione o arquivo .wv do backup.');
+      if (f.size > 5e6) throw new Error('Arquivo grande demais');
+      const old = $('bChOld').value, nw = $('bChNew').value;
+      if (!old) throw new Error('Digite a senha atual do backup.');
+      if (nw.length < 12) throw new Error('A nova senha do backup deve ter ao menos 12 caracteres.');
+      if (nw !== $('bChNew2').value) throw new Error('As senhas não conferem.');
+      if (nw === old) throw new Error('A nova senha deve ser diferente da atual.');
+      download('authix-backup-nova-senha.wv', await V.changeBackupPassword(await f.text(), old, nw));
+      closeBackup(); toast('Backup gerado com a nova senha');
+    } catch (e) { $('bMsg').textContent = e.message; }
+  });
+}
 
 $('unlockBtn').onclick = go;
 for (const i of ['pw', 'pw2']) $(i).addEventListener('keydown', e => e.key === 'Enter' && go());
@@ -173,6 +189,7 @@ $('backupBtn').onclick = $('emptyImport').onclick = () => { $('bMsg').textConten
 $('bClose').onclick = closeBackup;
 $('bExport').onclick = doExport;
 $('bImport').onclick = doImport;
+$('bChange').onclick = doChangeBk;
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(() => {});
 closeDialogs();
