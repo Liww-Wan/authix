@@ -13,7 +13,7 @@ const view = id => { $('lock').hidden = id !== 'lock'; $('app').hidden = id !== 
 const busy = async (btn, fn) => { btn.disabled = true; try { await fn(); } finally { btn.disabled = false; } };
 
 function closeDialogs() {
-  for (const id of ['dlgAcc', 'dlgBk', 'dlgPw']) {
+  for (const id of ['dlgAcc', 'dlgBk']) {
     const d = $(id);
     if (d.open) d.close();
     d.removeAttribute('open');
@@ -52,8 +52,8 @@ function lock() {
   try { stopCamera(); } catch {}
   $('list').replaceChildren(); $('search').value = '';
   closeDialogs();
-  for (const i of ['fUri', 'fIssuer', 'fName', 'fSecret', 'bMaster', 'bPw', 'bImpPw', 'pwCur', 'pwNew', 'pwNew2']) $(i).value = '';
-  $('bFile').value = ''; $('bMsg').textContent = ''; $('pwMsg').textContent = '';
+  for (const i of ['fUri', 'fIssuer', 'fName', 'fSecret', 'bMaster', 'bPw', 'bImpPw']) $(i).value = '';
+  $('bFile').value = ''; $('bMsg').textContent = '';
   $('accQr').removeAttribute('src'); $('accQr').hidden = true;
   showLock();
 }
@@ -153,28 +153,6 @@ async function doImport() {
   });
 }
 
-// --- trocar senha mestra ---
-function closePw() {
-  for (const i of ['pwCur', 'pwNew', 'pwNew2']) $(i).value = '';
-  $('pwMsg').textContent = '';
-  if ($('dlgPw').open) $('dlgPw').close();
-  $('dlgPw').hidden = true;
-}
-async function doChangePw() {
-  await busy($('pwSave'), async () => {
-    $('pwMsg').textContent = '';
-    try {
-      const cur = $('pwCur').value, nw = $('pwNew').value;
-      if (!cur) throw new Error('Digite a senha mestra atual.');
-      if (nw.length < 12) throw new Error('A nova senha deve ter ao menos 12 caracteres.');
-      if (nw !== $('pwNew2').value) throw new Error('As senhas não conferem.');
-      if (nw === cur) throw new Error('A nova senha deve ser diferente da atual.');
-      await V.changePassword(cur, nw);
-      closePw(); toast('Senha mestra alterada');
-    } catch (e) { $('pwMsg').textContent = e.message; }
-  });
-}
-
 $('unlockBtn').onclick = go;
 for (const i of ['pw', 'pw2']) $(i).addEventListener('keydown', e => e.key === 'Enter' && go());
 $('wipeBtn').onclick = () => { if (confirm('Apagar PERMANENTEMENTE o cofre deste navegador? Sem backup, não há recuperação.')) { V.wipe(); showLock(); } };
@@ -193,11 +171,6 @@ $('camBtn').onclick = async () => {
 $('accQrBtn').onclick = () => { $('accQr').src = Q.makeQR(T.buildUri(editing)); $('accQr').hidden = false; };
 $('backupBtn').onclick = $('emptyImport').onclick = () => { $('bMsg').textContent = ''; $('dlgBk').hidden = false; $('dlgBk').showModal(); };
 $('bClose').onclick = closeBackup;
-$('pwBtn').onclick = () => { $('pwMsg').textContent = ''; $('dlgPw').hidden = false; $('dlgPw').showModal(); };
-$('pwCancel').onclick = closePw;
-$('pwSave').onclick = doChangePw;
-$('dlgPw').addEventListener('close', () => { for (const i of ['pwCur', 'pwNew', 'pwNew2']) $(i).value = ''; $('pwMsg').textContent = ''; });
-for (const i of ['pwCur', 'pwNew', 'pwNew2']) $(i).addEventListener('keydown', e => e.key === 'Enter' && doChangePw());
 $('bExport').onclick = doExport;
 $('bImport').onclick = doImport;
 
