@@ -25,6 +25,18 @@ export async function unlock(pw) {
   key = k; meta = { v: m.v, kdf: m.kdf, iter: m.iter, salt: m.salt }; accounts = d.accounts;
 }
 export const verify = async pw => { need(); await open(pw); };
+// Troca a senha mestra: confirma a atual, gera salt novo e recifra tudo.
+// A chave/meta em memória só mudam depois que a gravação der certo (sem estado pela metade).
+export async function changePassword(oldPw, newPw) {
+  need();
+  await open(oldPw); // lança 'Senha incorreta…' se a senha atual estiver errada
+  const salt = C.rnd(16), k = await C.deriveKey(newPw, salt);
+  const m = { v: meta.v, kdf: 'PBKDF2-HMAC-SHA-256', iter: C.ITER, salt: C.b64(salt) };
+  const e = await C.encryptJSON(k, { accounts });
+  await C.decryptJSON(k, e); // confere que o novo texto cifrado abre com a nova chave
+  localStorage.setItem(KEY, JSON.stringify({ ...m, ...e }));
+  key = k; meta = m;
+}
 export function lock() { key = null; meta = null; accounts = []; }
 export const list = () => accounts.slice().sort((a, b) => (a.issuer + a.name).localeCompare(b.issuer + b.name, 'pt', { sensitivity: 'base' }));
 export async function upsert(a) {

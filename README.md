@@ -42,7 +42,10 @@ Clique em **Backup**, digite a senha mestra e escolha uma senha para o backup (p
 ### 6. Recupere o backup
 Se trocar de aparelho ou apagar o cofre: crie um cofre novo, clique em **Backup**, escolha o arquivo `.wv`, digite a **senha do backup** e clique em **Importar**.
 
-### 7. Use sem Internet
+### 7. Troque a senha mestra
+Com o cofre aberto, clique no ícone de chave (**Trocar senha**), digite a senha atual e a nova senha duas vezes (mínimo de 12 caracteres). O cofre é recifrado com um salt novo e as contas continuam todas lá. Os backups `.wv` que você já exportou **não mudam**: eles continuam com a senha escolhida na hora do backup. Se quiser, exporte um backup novo depois da troca.
+
+### 8. Use sem Internet
 Depois da primeira visita, o app funciona mesmo sem Internet.
 
 ### 8. Apague tudo

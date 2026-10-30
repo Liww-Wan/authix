@@ -67,6 +67,7 @@
           </div>
           <button id="addBtn" class="primary"><i class="fa-solid fa-plus" aria-hidden="true"></i><span>Adicionar</span></button>
           <button id="backupBtn" class="tool" aria-label="Backup" title="Backup"><i class="fa-solid fa-box-archive" aria-hidden="true"></i><span>Backup</span></button>
+          <button id="pwBtn" class="tool" aria-label="Trocar senha mestra" title="Trocar senha mestra"><i class="fa-solid fa-vault" aria-hidden="true"></i><span>Trocar senha</span></button>
           <button id="lockBtn" class="tool" aria-label="Bloquear" title="Bloquear"><i class="fa-solid fa-lock" aria-hidden="true"></i><span>Bloquear</span></button>
         </div>
 
@@ -119,6 +120,17 @@
   <button id="bImport"><i class="fa-solid fa-file-import" aria-hidden="true"></i><span>Importar</span></button>
   <p id="bMsg" class="err" role="alert"></p>
   <button id="bClose">Fechar</button>
+</dialog>
+
+<dialog id="dlgPw">
+  <h2>Trocar senha mestra</h2>
+  <p class="muted small">O cofre será recifrado com a nova senha. Seus backups .wv já exportados não mudam: eles continuam com a senha que você escolheu na hora de exportar.</p>
+  <input id="pwCur" class="secret" type="text" placeholder="Senha mestra atual" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore aria-label="Senha mestra atual">
+  <input id="pwNew" class="secret" type="text" placeholder="Nova senha mestra (mín. 12 caracteres)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore aria-label="Nova senha mestra">
+  <input id="pwNew2" class="secret" type="text" placeholder="Confirmar nova senha mestra" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-lpignore="true" data-1p-ignore aria-label="Confirmar nova senha mestra">
+  <p id="pwMsg" class="err" role="alert"></p>
+  <p class="muted small">Se esquecer a nova senha e não tiver um backup válido, o cofre será irrecuperável.</p>
+  <div class="row"><button id="pwCancel">Cancelar</button><button id="pwSave" class="primary">Trocar senha</button></div>
 </dialog>
 
 <footer class="foot">
